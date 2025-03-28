@@ -11,8 +11,8 @@ $alpha = [a-zA-Z]
 tokens :-
 $white+         ; 
   "--".*        ; 
-  let           { \p s -> PT p TokenLet } 
-  in            { \p s -> PT p TokenIn }
+  INPUT         { \p s -> PT p TokenINPUT} 
+  OUTPUT        { \p s -> PT p TokenOUTPUT }
   $digit+       { \p s -> PT p (TokenInt (read s)) } 
   \=            { \p s -> PT p TokenEq }
   \+            { \p s -> PT p TokenPlus }
@@ -30,8 +30,8 @@ data PosnToken = PT AlexPosn Token deriving (Eq, Show)
 -- Each action has type :: String -> Token 
 -- The token type: 
 data Token = 
-  TokenLet         | 
-  TokenIn          | 
+  TokenINPUT       | 
+  TokenOUTPUT      | 
   TokenInt Int     |
   TokenVar String  | 
   TokenEq          |
