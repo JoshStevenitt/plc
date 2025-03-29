@@ -14,7 +14,7 @@ $white+         ;
   INPUT         { \p s -> PT p TokenINPUT} 
   OUTPUT        { \p s -> PT p TokenOUTPUT }
   $digit+       { \p s -> PT p (TokenInt (read s)) } 
-  \=            { \p s -> PT p TokenEq }
+  LET            { \p s -> PT p TokenLET }
   \+            { \p s -> PT p TokenPlus }
   \-            { \p s -> PT p TokenMinus }
   \*            { \p s -> PT p TokenTimes }
@@ -34,7 +34,7 @@ data Token =
   TokenOUTPUT      | 
   TokenInt Int     |
   TokenVar String  | 
-  TokenEq          |
+  TokenLET          |
   TokenPlus        |
   TokenMinus       |
   TokenTimes       |
