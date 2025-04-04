@@ -11,17 +11,24 @@ $alpha = [a-zA-Z]
 tokens :-
 $white+         ; 
   "--".*        ; 
-  INPUT         { \p s -> PT p TokenINPUT} 
-  OUTPUT        { \p s -> PT p TokenOUTPUT }
-  $digit+       { \p s -> PT p (TokenInt (read s)) } 
-  LET            { \p s -> PT p TokenLET }
-  IN            { \p s -> PT p TokenIN }
-  \-            { \p s -> PT p TokenMinus }
-  \*            { \p s -> PT p TokenTimes }
-  \/            { \p s -> PT p TokenDiv }
-  \(            { \p s -> PT p TokenLParen }
-  \)            { \p s -> PT p TokenRParen }
-  \^            { \p s -> PT p TokenExpenential}
+  INPUT                     { \p s -> PT p TokenINPUT} 
+  OUTPUT                    { \p s -> PT p TokenOUTPUT }
+  $digit+                   { \p s -> PT p (TokenInt (read s)) } 
+  LET                       { \p s -> PT p TokenLET }
+  BE                        { \p s -> PT p TokenBE }
+  \{                        { \p s -> PT p TokenSquigleBracketL }
+  \}                        { \p s -> PT p TokenSquigleBracketR }
+  \,                        { \p s -> PT p TokenComma }
+  \-                        { \p s -> PT p TokenDash }
+  QUERIES END               { \p s -> PT p TokenQueriesEnd }
+  PRODUCT                   { \p s -> PT p TokenPRODUCT}
+  SORT                      { \p s -> PT p TokenSORT}
+  INSERT                    { \p s -> PT p TokenINSERT}
+  FILL                      { \p s -> PT p TokenFILL}
+  DELETE                    { \p s -> PT p TokenDELETE}
+  CLEAR                     { \p s -> PT p TokenCLEAR}
+  COLUMN                    { \p s -> PT p TokenCOLUMN}
+  ROW                       { \p s -> PT p TokenROW}
   $alpha [$alpha $digit \_ \']*   { \p s -> PT p (TokenVar s) } 
 
 { 
@@ -30,18 +37,25 @@ data PosnToken = PT AlexPosn Token deriving (Eq, Show)
 -- Each action has type :: String -> Token 
 -- The token type: 
 data Token = 
-  TokenINPUT       | 
-  TokenOUTPUT      | 
-  TokenInt Int     |
-  TokenVar String  | 
-  TokenLET         |
-  TokenIN          |
-  TokenMinus       |
-  TokenTimes       |
-  TokenDiv         |
-  TokenLParen      |
-  TokenRParen      |
-  TokenExpenential 
+  TokenINPUT                | 
+  TokenOUTPUT               | 
+  TokenInt Int              |
+  TokenVar String           | 
+  TokenLET                  |
+  TokenBE                   |
+  TokenSquigleBracketL      |
+  TokenSquigleBracketR      |
+  TokenComma                |
+  TokenDash                 |
+  TokenQueriesEnd           |
+  TokenPRODUCT              |
+  TokenSORT                 |
+  TokenINSERT               |
+  TokenFILL                 |
+  TokenDELETE               |
+  TokenCLEAR                |
+  TokenCOLUMN               |
+  TokenROW                  
   deriving (Eq,Show) 
 
 tokenPosn :: PosnToken -> String
