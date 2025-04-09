@@ -29,21 +29,34 @@ import Lexer
   FROMTABLES      { PT _ TokenFROMTABLES }
   JOIN            { PT _ TokenJOIN }
   TABLE           { PT _ TokenTABLE }
+  AS              { PT _ TokenAS }
+  WITHLABELS      { PT _ TokenWITHLABELS }
+  NOLABELS        { PT _ TokenNOLABELS }
   int             { PT _ (TokenInt $$) }
   var             { PT _ (TokenVar $$) }
   '{'             { PT _ TokenSquigleBracketL }
   '}'             { PT _ TokenSquigleBracketR }
   '-'             { PT _ TokenDash }
   ','             { PT _ TokenComma }
+  '['             { PT _ TokenSquareBracketL }
+  ']'             { PT _ TokenSquareBracketR }
 
 %%
 
 Start : '{' Inputs '}' Queries Output       { Start $2 $4 $5 }
 
 Inputs : Input ',' Inputs                   { InputsCons $1 $3 }
-       |                                    { InputsNil }
+       | Input                              { InputSingle $1}
 
-Input : INPUT var                           { Input $2 }
+Input : INPUT FILE var AS TableAssignment   { Input $3 $5}
+
+TableAssignment : Table NOLABELS            { NoLabels $1}
+        | Table WITHLABELS ColumnLabels     { WithLabels $1 $3}
+
+ColumnLabels : '[' Strings ']'              { LabelConstructor $2}
+
+Strings : var ',' Strings                   { StringMultiple $1 $3}
+        | var                               { StringSingular $1}
 
 Queries : LET Table BE Query '-' Queries    { QueryLet $2 $4 $6 }
         | Query '-' Queries                 { QueryDash $1 $3 }
@@ -76,8 +89,6 @@ Output : OUTPUT Table TO OutputType         { OutputConstruct $2 $4 }
 OutputType : STANDARD                       { Standard }
            | FILE var                       { File $2 }
 
-
-
 {
 parseError :: [PosnToken] -> a
 parseError _ = error "Parse error"
@@ -85,10 +96,20 @@ parseError _ = error "Parse error"
 data Start = Start Inputs Queries Output deriving Show
 
 data Inputs = InputsCons Input Inputs
-            | InputsNil
+            | InputSingle Input
             deriving Show
 
-data Input = Input String deriving Show
+data Input = Input String TableAssignment deriving Show
+
+data TableAssignment = NoLabels Table
+            | WithLabels Table ColumnLabels
+            deriving Show
+
+data ColumnLabels = LabelConstructor Strings deriving Show
+
+data Strings = StringMultiple String Strings
+            | StringSingular String
+            deriving Show
 
 data Table = TableRef String deriving Show
 
