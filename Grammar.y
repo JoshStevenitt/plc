@@ -72,7 +72,7 @@ Query : MERGE                               { Merge }
       | DELETE Table Axis                   { Delete $2 $3 }
       | CLEAR Table Position                { Clear $2 $3 }
 
-Selection : FROMTABLES Table                { FromSelection $2 }
+Selection : FROMTABLES Tables                { FromSelection $2 }
           | TABLE Table                     { TableOnly $2 }
           | TABLE Table Position            { TableWithPosition $2 $3 }
           | TABLE Table Axis                { TableWithAxis $2 $3 }
@@ -83,6 +83,9 @@ Axis : COLUMN int                           { Column $2 }
      | ROW int                              { Row $2 }
 
 Table : var                                 { TableRef $1 }
+
+Tables : Table ',' Tables                   { TablesMultiple $1 $3}
+        | Table                             { TableSingular $1}
 
 Output : OUTPUT Table TO OutputType         { OutputConstruct $2 $4 }
 
@@ -96,50 +99,54 @@ parseError _ = error "Parse error"
 data Start = Start Inputs Queries Output deriving Show
 
 data Inputs = InputsCons Input Inputs
-            | InputSingle Input
-            deriving Show
+                | InputSingle Input
+                deriving Show
 
 data Input = Input String TableAssignment deriving Show
 
 data TableAssignment = NoLabels Table
-            | WithLabels Table ColumnLabels
-            deriving Show
+                | WithLabels Table ColumnLabels
+                deriving Show
 
 data ColumnLabels = LabelConstructor Strings deriving Show
 
 data Strings = StringMultiple String Strings
-            | StringSingular String
-            deriving Show
+                | StringSingular String
+                deriving Show
 
 data Table = TableRef String deriving Show
+
+data Tables = TablesMultiple Table Tables 
+                | TableSingular Table
+                deriving Show 
 
 data Position = Comma Int Int deriving Show
 
 data Queries = QueryLet Table Query Queries
-             | QueryDash Query Queries
-             | QueryEnd
-             deriving Show
+                | QueryDash Query Queries
+                | QueryEnd
+                deriving Show
 
 
 data Query = Merge
-           | Select Selection
-           | Product
-           | Sort
-           | Insert String Table Position
-           | Fill String Table Axis
-           | Delete Table Axis
-           | Clear Table Position
-           deriving Show
+                | Select Selection
+                | Product
+                | Sort
+                | Insert String Table Position
+                | Fill String Table Axis
+                | Delete Table Axis
+                | Clear Table Position
+                deriving Show
 
-data Selection = FromSelection Table
-               | TableOnly Table
-               | TableWithPosition Table Position
-               | TableWithAxis Table Axis
-               deriving Show
+data Selection = FromSelection Tables
+                | TableOnly Table
+                | TableWithPosition Table Position
+                | TableWithAxis Table Axis
+                deriving Show
 
 data Axis = Column Int
-          | Row Int
-          deriving Show
+                | Row Int
+                deriving Show
 
 data Output = OutputConstruct Table OutputType deriving Show
 
