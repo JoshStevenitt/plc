@@ -6,6 +6,8 @@ module Lexer where
 
 $digit = 0-9
 $alpha = [a-zA-Z]
+$alphaLower = a-z
+$alphaUpper = A-Z
 
 tokens :-
   $white+             ;
@@ -28,21 +30,47 @@ tokens :-
   DELETE              { \p s -> PT p TokenDELETE }
   CLEAR               { \p s -> PT p TokenCLEAR }
   COLUMN              { \p s -> PT p TokenCOLUMN }
+  COLUMNS             { \p s -> PT p TokenCOLUMNS }
   ROW                 { \p s -> PT p TokenROW }
   FROMTABLES          { \p s -> PT p TokenFROMTABLES }
+  FROM                { \p s -> PT p TokenFROM }
   JOIN                { \p s -> PT p TokenJOIN }
+  INNER               { \p s -> PT p TokenINNER }
+  LEFT                { \p s -> PT p TokenLEFT }
+  RIGHT               { \p s -> PT p TokenRIGHT }
+  FULL                { \p s -> PT p TokenFULL }
+  OUTER               { \p s -> PT p TokenOUTER }
   TABLE               { \p s -> PT p TokenTABLE }
   AS                  { \p s -> PT p TokenAS }
   WITHLABELS          { \p s -> PT p TokenWITHLABELS }
   NOLABELS            { \p s -> PT p TokenNOLABELS }
+  WHERE               { \p s -> PT p TokenWHERE }
+  WITHCONSTRAINT      { \p s -> PT p TokenWITHCONSTRAINT }
+  AND                 { \p s -> PT p TokenAND }
+  OR                  { \p s -> PT p TokenOR }
+  NOT                 { \p s -> PT p TokenNOT }
+  MAX                 { \p s -> PT p TokenMAX}
+  DISTINCT            { \p s -> PT p TokenDISTINCT}
+  PLUS                { \p s -> PT p TokenPLUSWORD}
+  \=                  { \p s -> PT p TokenEQUAL }
+  INDEX               { \p s -> PT p TokenINDEX }
+  \+                  { \p s -> PT p TokenPLUS }
+  \*                  { \p s -> PT p TokenMULTIPLY }
+  \/                  { \p s -> PT p TokenDIVSINGLE }
+  "//"                { \p s -> PT p TokenDIVTWO }
+  \%                  { \p s -> PT p TokenPERCENT }
+  \^                  { \p s -> PT p TokenEXP }
   \{                  { \p s -> PT p TokenSquigleBracketL }
   \}                  { \p s -> PT p TokenSquigleBracketR }
   \,                  { \p s -> PT p TokenComma }
   \-                  { \p s -> PT p TokenDash }
   \[                  { \p s -> PT p TokenSquareBracketL }
   \]                  { \p s -> PT p TokenSquareBracketR }
-  $digit+             { \p s -> PT p (TokenInt (read s)) }
-  $alpha [$alpha $digit \_ \']* { \p s -> PT p (TokenVar s) }
+  \.                  { \p s -> PT p TokenDot }
+  \(                  { \p s -> PT p TokenBracketL }
+  \)                  { \p s -> PT p TokenBracketR }
+  $digit              { \p s -> PT p (TokenInt (read s)) }
+  $alphaLower         { \p s -> PT p (TokenAlphaLower s) }
 
 {
 data PosnToken = PT AlexPosn Token deriving (Eq, Show)
@@ -51,7 +79,7 @@ data Token =
     TokenINPUT
   | TokenOUTPUT
   | TokenInt Int
-  | TokenVar String
+  | TokenAlphaLower String
   | TokenLET
   | TokenBE
   | TokenSquigleBracketL
@@ -71,15 +99,41 @@ data Token =
   | TokenDELETE
   | TokenCLEAR
   | TokenCOLUMN
+  | TokenCOLUMNS
   | TokenROW
   | TokenFROMTABLES
+  | TokenFROM
   | TokenJOIN
+  | TokenINNER
+  | TokenLEFT
+  | TokenRIGHT
+  | TokenFULL
+  | TokenOUTER
   | TokenTABLE
   | TokenAS 
   | TokenWITHLABELS
   | TokenNOLABELS
+  | TokenWHERE
+  | TokenWITHCONSTRAINT
+  | TokenAND
+  | TokenOR
+  | TokenNOT
+  | TokenEQUAL
+  | TokenINDEX
+  | TokenPLUS
+  | TokenMULTIPLY
+  | TokenDIVSINGLE
+  | TokenDIVTWO
+  | TokenPERCENT
+  | TokenEXP
   | TokenSquareBracketL
   | TokenSquareBracketR
+  | TokenDot
+  | TokenBracketL
+  | TokenBracketR
+  | TokenMAX
+  | TokenDISTINCT
+  | TokenPLUSWORD
   deriving (Eq, Show)
 
 tokenPosn :: PosnToken -> String
