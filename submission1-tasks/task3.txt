@@ -1,0 +1,8 @@
+{INPUT FILE "A.csv" AS a NOLABELS}
+LET existenceCheck BE
+    SELECT COLUMNS *
+    FROM a
+    WHERE NOT (a.2 = "") 
+    -
+QUERIESEND
+OUTPUT existenceCheck TO STANDARD

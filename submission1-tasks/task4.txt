@@ -1,0 +1,13 @@
+{INPUT FILE "A.csv" AS a NOLABELS}
+LET newColumn BE
+    ADD BLANK TO a COLUMN 2
+    -
+LET fooColumn BE
+    FILL "foo" newColumn COLUMN 2
+    -
+LET copyingAndConstants BE
+    SELECT COLUMNS a.1, a.2, a.1
+    FROM a
+    -
+QUERIESEND
+OUTPUT copyingAndConstants TO STANDARD

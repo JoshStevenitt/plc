@@ -1,0 +1,6 @@
+{INPUT FILE "A.csv" AS a NO LABELS, INPUT FILE "B.csv" AS b NO LABELS} 
+LET crossProduct BE 
+    PRODUCT a b 
+    -
+QUERIESEND
+OUTPUT a TO STANDARD

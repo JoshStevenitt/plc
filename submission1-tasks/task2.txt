@@ -1,0 +1,8 @@
+{INPUT FILE "A.csv" AS a NOLABELS}
+LET permutationDropMatch BE
+    SELECT COLUMNS a.3, a.1
+    FROM a
+    WHERE a.1 = a.2 
+    -
+QUERIESEND
+OUTPUT permutationDropMatch TO STANDARD
