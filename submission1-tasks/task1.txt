@@ -2,5 +2,8 @@
 LET crossProduct BE 
     PRODUCT a b 
     -
+LET sortedCrossProduct BE
+    SORT crossProduct
+    -
 QUERIESEND
-OUTPUT a TO STANDARD
+OUTPUT sortedCrossProduct TO STANDARD

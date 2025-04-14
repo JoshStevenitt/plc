@@ -4,5 +4,8 @@ LET permutationDropMatch BE
     FROM a
     WHERE a.1 = a.2 
     -
+LET sortedPermutationDropMatch BE
+    SORT permutationDropMatch
+    -
 QUERIESEND
-OUTPUT permutationDropMatch TO STANDARD
+OUTPUT sortedPermutationDropMatch TO STANDARD

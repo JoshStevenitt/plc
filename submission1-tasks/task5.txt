@@ -3,5 +3,8 @@ LET merge BE
     MERGE p q 
     WITHCONSTRAINT p.1 = q.1
     -
+LET sortedMerge BE
+    SORT merge
+    -
 QUERIESEND
-OUTPUT merge TO STANDARD
+OUTPUT sortedMerge TO STANDARD

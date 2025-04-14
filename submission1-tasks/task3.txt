@@ -4,5 +4,8 @@ LET existenceCheck BE
     FROM a
     WHERE NOT (a.2 = "") 
     -
+LET sortedExistenceCheck BE
+    SORT existenceCheck
+    -
 QUERIESEND
-OUTPUT existenceCheck TO STANDARD
+OUTPUT sortedExistenceCheck TO STANDARD

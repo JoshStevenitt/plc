@@ -9,5 +9,8 @@ LET copyingAndConstants BE
     SELECT COLUMNS a.1, a.2, a.1
     FROM a
     -
+LET sortedCopyingAndConstants BE
+    SORT copyingAndConstants
+    -
 QUERIESEND
-OUTPUT copyingAndConstants TO STANDARD
+OUTPUT sortedCopyingAndConstants TO STANDARD
