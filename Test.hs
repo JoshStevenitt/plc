@@ -9,5 +9,7 @@ main = do
     case args of
         [filename] -> do
             content <- readFile filename
-            let tree = parseCalc $ alexScanTokens content
+            let tokens = alexScanTokens content
+            print tokens
+            let tree = parseCalc tokens
             print tree

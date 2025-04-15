@@ -8,64 +8,90 @@ import Lexer
 %error { parseError }
 
 %token
-  INPUT           { PT _ TokenINPUT }
-  OUTPUT          { PT _ TokenOUTPUT }
-  LET             { PT _ TokenLET }
-  BE              { PT _ TokenBE }
-  QUERIESEND      { PT _ TokenQueriesEnd }
-  MERGE           { PT _ TokenMERGE }
-  SELECT          { PT _ TokenSELECT }
-  TO              { PT _ TokenTO }
-  STANDARD        { PT _ TokenSTANDARD }
-  FILE            { PT _ TokenFILE }
-  PRODUCT         { PT _ TokenPRODUCT }
-  SORT            { PT _ TokenSORT }
-  INSERT          { PT _ TokenINSERT }
-  FILL            { PT _ TokenFILL }
-  DELETE          { PT _ TokenDELETE }
-  CLEAR           { PT _ TokenCLEAR }
-  COLUMN          { PT _ TokenCOLUMN }
-  COLUMNS         { PT _ TokenCOLUMNS } 
-  ROW             { PT _ TokenROW }
-  FROMTABLES      { PT _ TokenFROMTABLES }
-  FROM            { PT _ TokenFROM}
-  JOIN            { PT _ TokenJOIN }
-  INNER           { PT _ TokenINNER }
-  LEFT            { PT _ TokenLEFT }
-  RIGHT           { PT _ TokenRIGHT }
-  FULL            { PT _ TokenFULL }
-  OUTER           { PT _ TokenOUTER }
-  TABLE           { PT _ TokenTABLE }
-  AS              { PT _ TokenAS }
-  WITHLABELS      { PT _ TokenWITHLABELS }
-  NOLABELS        { PT _ TokenNOLABELS }
-  WHERE           { PT _ TokenWHERE }
-  WITHCONSTRAINT  { PT _ TokenWITHCONSTRAINT }
-  AND             { PT _ TokenAND }
-  OR              { PT _ TokenOR }
-  NOT             { PT _ TokenNOT }
-  INDEX           { PT _ TokenINDEX }
-  MAX             { PT _ TokenMAX }
-  PLUS            { PT _ TokenPLUSWORD}
-  DISTINCT        { PT _ TokenDISTINCT}
-  int             { PT _ (TokenInt $$) }
-  var             { PT _ (TokenVAlphaLower $$) }
-  '='             { PT _ TokenEQUAL }
-  '+'             { PT _ TokenPLUS }
-  '*'             { PT _ TokenMULTIPLY }
-  '/'             { PT _ TokenDIVSINGLE }
-  "//"            { PT _ TokenDIVTWO }
-  '%'             { PT _ TokenPERCENT }
-  '^'             { PT _ TokenEXP }
-  '{'             { PT _ TokenSquigleBracketL }
-  '}'             { PT _ TokenSquigleBracketR }
-  '-'             { PT _ TokenDash }
-  ','             { PT _ TokenComma }
-  '['             { PT _ TokenSquareBracketL }
-  ']'             { PT _ TokenSquareBracketR }
-  '.'             { PT _ TokenDot }
-  '('             { PT _ TokenBracketL }
-  ')'             { PT _ TokenBracketR }
+  INPUT                 { PT _ TokenINPUT }
+  OUTPUT                { PT _ TokenOUTPUT }
+  LET                   { PT _ TokenLET }
+  BE                    { PT _ TokenBE }
+  QUERIESEND            { PT _ TokenQueriesEnd }
+  MERGE                 { PT _ TokenMERGE }
+  SELECT                { PT _ TokenSELECT }
+  TO                    { PT _ TokenTO }
+  STANDARD              { PT _ TokenSTANDARD }
+  FILE                  { PT _ TokenFILE }
+  PRODUCT               { PT _ TokenPRODUCT }
+  SORT                  { PT _ TokenSORT }
+  INSERT                { PT _ TokenINSERT }
+  FILL                  { PT _ TokenFILL }
+  DELETE                { PT _ TokenDELETE }
+  CLEAR                 { PT _ TokenCLEAR }
+  COLUMN                { PT _ TokenCOLUMN }
+  COLUMNS               { PT _ TokenCOLUMNS } 
+  ROW                   { PT _ TokenROW }
+  FROMTABLES            { PT _ TokenFROMTABLES }
+  FROM                  { PT _ TokenFROM}
+  JOIN                  { PT _ TokenJOIN }
+  INNER                 { PT _ TokenINNER }
+  LEFT                  { PT _ TokenLEFT }
+  RIGHT                 { PT _ TokenRIGHT }
+  FULL                  { PT _ TokenFULL }
+  OUTER                 { PT _ TokenOUTER }
+  TABLE                 { PT _ TokenTABLE }
+  AS                    { PT _ TokenAS }
+  WITHLABELS            { PT _ TokenWITHLABELS }
+  NOLABELS              { PT _ TokenNOLABELS }
+  WHERE                 { PT _ TokenWHERE }
+  WITHCONSTRAINT        { PT _ TokenWITHCONSTRAINT }
+  AND                   { PT _ TokenAND }
+  OR                    { PT _ TokenOR }
+  NOT                   { PT _ TokenNOT }
+  INDEX                 { PT _ TokenINDEX }
+  MAX                   { PT _ TokenMAX }
+  PLUS                  { PT _ TokenPLUSWORD}
+  DISTINCT              { PT _ TokenDISTINCT}
+  ASC                   { PT _ TokenASC }
+  DESC                  { PT _ TokenDESC }
+  ADDBLANKTO            { PT _ TokenADDBLANKTO }
+  '='                   { PT _ TokenEQUAL }
+  '+'                   { PT _ TokenPLUS }
+  '*'                   { PT _ TokenMULTIPLY }
+  '/'                   { PT _ TokenDIVSINGLE }
+  "//"                  { PT _ TokenDIVTWO }
+  '%'                   { PT _ TokenPERCENT }
+  '^'                   { PT _ TokenEXP }
+  '{'                   { PT _ TokenSquigleBracketL }
+  '}'                   { PT _ TokenSquigleBracketR }
+  '-'                   { PT _ TokenDash }
+  ','                   { PT _ TokenComma }
+  '['                   { PT _ TokenSquareBracketL }
+  ']'                   { PT _ TokenSquareBracketR }
+  '.'                   { PT _ TokenDot }
+  '('                   { PT _ TokenBracketL }
+  ')'                   { PT _ TokenBracketR }
+  int                   { PT _ (TokenInt $$) }
+  alphaLower            { PT _ (TokenAlphaLower $$) }
+  alphaUpper            { PT _ (TokenAlphaUpper $$)}
+  digits                { PT _ (TokenDigits $$)}
+  Filename              { PT _ (TokenFilename $$)}
+  alphaNumericString    { PT _ (TokenAlphaNumericString $$)}
+  positiveNum           { PT _ (TokenPositiveNumber $$)}
+  negativeNum           { PT _ (TokenNegativeNumber $$)}
+  var                   { PT _ (TokenString $$)}
+
+-- Arithmetic (high precedence)
+%right '^'
+%left '*' '/' "//" '%'
+%left '+' '-'
+
+-- Comparison
+%nonassoc '='
+
+-- Boolean (lower precedence)
+%nonassoc NOT
+%right AND
+%right OR
+
+-- Unary minus (lowest, disambiguated manually)
+%nonassoc NEG
 
 %%
 
@@ -74,31 +100,32 @@ Start : '{' Inputs '}' Queries Output                   { Start $2 $4 $5 }
 Inputs : Input ',' Inputs                               { InputsCons $1 $3 }
        | Input                                          { InputSingle $1 }
 
-Input : INPUT FILE var AS TableAssignment               { Input $3 $5 }
+Input : INPUT FILE Filename AS TableAssignment          { Input $3 $5 }
 
 TableAssignment : TableName NOLABELS                    { NoLabels $1 }
         | TableName WITHLABELS ColumnLabels             { WithLabels $1 $3 }
 
-TableName : AlphaNumericString                          { TableRef $1 }
+TableName : alphaNumericString                          { TableRef $1 }
 
-Tables : TableName ',' TableName                        { TablesMultiple $1 $3 }
-        | TableName                                     { TableSingular $1 }
+--Tables : TableName ',' TableName                        { TablesMultiple $1 $3 }
+--        | TableName                                     { TableSingular $1 }
+--
 
+ColumnLabels : '[' alphaNumericString ']'               { LabelConstructor $2 }
 
-ColumnLabels : '[' AlphaNumericStrings ']'              { LabelConstructor $2 }
-
-ColumnReference : TableName '.' AlphaNumericString      { AlphaColumn $1 $3 }
+ColumnReference : TableName '.' alphaNumericString      { AlphaColumn $1 $3 }
         | TableName '.' int                             { IntegerColumn $1 $3 }
 
 Output : OUTPUT TableName TO OutputType                 { OutputConstruct $2 $4 }
 
 OutputType : STANDARD                                   { Standard }
-           | FILE var                                   { File $2 }
+           | FILE Filename                              { File $2 }
         
 Position : int ',' int                                  { Comma $1 $3 }
 
-Axis : COLUMN int                                       { Column $2 }
-     | ROW int                                          { Row $2 }
+Axis : COLUMN int                                       { ColumnInt $2 }
+        | COLUMN alphaNumericString                     { ColumnAlpha $2 }
+        | ROW int                                       { Row $2 }
 
 Queries : LET TableName BE Query '-' Queries            { QueryLet $2 $4 $6 }
         | QUERIESEND                                    { QueryEnd }
@@ -108,16 +135,20 @@ TableExpression : TableName                             { SingleTable $1 }
         | LET TableAssignment BE JoinClause             { TableLetJoin $2 $4 }
         | '(' TableExpression ')'                       { SingleTableExpression $2 }
 
-Query : MERGE                                           { Merge }
+Query : MERGE TableName TableName WITHCONSTRAINT BooleanExpression { Merge $2 $3 $5 }
       | Selection                                       { Select }
-      | PRODUCT                                         { Product }
-      | SORT TableName                                  { Sort $2}
+      | PRODUCT TableName TableName                     { Product $2 $3 }
+      | SORT TableName SortClause                       { Sort $2 $3 }
       | INSERT var TableName Position                   { Insert $2 $3 $4 }
       | FILL var TableName Axis                         { Fill $2 $3 $4 }
       | DELETE TableName Axis                           { Delete $2 $3 }
       | CLEAR TableName Position                        { Clear $2 $3 }
+      | ADDBLANKTO TableName Axis                       { AddBank $2 $3}
 
-Selection : SELECT MaxClause Distinct ColumnChoice FROM TableExpression WhereClause PlusClause {Select $2 $3 $4 $6 $7 $8}
+Selection : SELECT MaxClause Distinct ColumnChoice FROM TableExpression WhereClause PlusClause {Selecter $2 $3 $4 $6 $7 $8}
+
+SortClause : ASC                                        { SortASC }
+        | DESC                                          { SortDesc }
 
 MaxClause : MAX Number                                  { MaxTrue $2}
         |                                               { MaxFalse }
@@ -126,13 +157,13 @@ Distinct : DISTINCT                                     { DistinctTrue }
         |                                               { DistinctFalse }
 
 ColumnChoice : COLUMNS '*'                              { ColumnALL }
-        | COLUMNS ColumnReference                       { ColumnReference }
-        | COLUMNS ColumnReference ColumnChoice          { ColumnMultiple }
+        | COLUMN ColumnReference                        { ColumnSingle $2}
+        | COLUMN ColumnReference ',' ColumnChoice       { ColumnMultiple $2 $4}
 
 WhereClause : WHERE BooleanExpression                   { WhereTrue $2 }
         |                                               { WhereFalse }
 
-PlusClause : PLUS Selection                             { PlusTrue }
+PlusClause : PLUS Selection                             { PlusTrue $2}
         |                                               { PlusFalse }
 
 JoinClause : TableExpression JoinOperator TableExpression WITHCONSTRAINT BooleanExpression { JoinClause $1 $2 $3 $5 }
@@ -144,41 +175,29 @@ JoinOperator : INNER JOIN                               { JoinInner }
         | OUTER JOIN                                    { JoinOuter }
 
 BooleanExpression : '(' BooleanExpression ')'           { BooleanBracket $2 }
-        | BooleanExpression AND BooleanExpression       { BooleanAND $1 $3 }
-        | BooleanExpression OR BooleanExpression        { BooleanOR $1 $3 }
-        | NOT BooleanExpression                         { BooleanNOT $2 }
-        | SubExpression '=' SubExpression               { BooleanSubExpression $1 $3 }
+        | BooleanExpression AND BooleanExpression %prec AND { BooleanAND $1 $3 }
+        | BooleanExpression OR BooleanExpression %prec OR { BooleanOR $1 $3 }
+        | NOT BooleanExpression %prec NOT               { BooleanNOT $2 }
+        | SubExpression '=' SubExpression  %prec '='    { BooleanSubExpression $1 $3 }
 
 SubExpression : BooleanExpression                       { SubBoolean $1 }
         | ColumnReference                               { SubColumn $1 }
         | var                                           { SubString $1 }
-        | IndexExpression                               { SubIndex $1 }
+        | IndexExpression %prec NEG                     { SubIndex $1 }
 
 IndexExpression : INDEX                                 { IndexSingular }
-        | Number                                        { IndexNum }
+        | Number                                        { IndexNum $1}
         | '(' IndexExpression ')'                       { IndexBracket $2 }
-        | IndexExpression '+' IndexExpression           { IndexPlus $1 $2 }
-        | IndexExpression '-' IndexExpression           { IndexMinus $1 $2 } 
-        | IndexExpression '*' IndexExpression           { IndexMult $1 $2 } 
-        | IndexExpression '/' IndexExpression           { IndexSingularDiv $1 $2 } 
-        | IndexExpression "//" IndexExpression          { IndexTwoDiv $1 $2 } 
-        | IndexExpression '%' IndexExpression           { IndexPercent $1 $2 } 
-        | IndexExpression '^' IndexExpression           { IndexExpo $1 $2 }
+        | IndexExpression '+' IndexExpression           { IndexPlus $1 $3 }
+        | IndexExpression '-' IndexExpression           { IndexMinus $1 $3 } 
+        | IndexExpression '*' IndexExpression           { IndexMult $1 $3 } 
+        | IndexExpression '/' IndexExpression           { IndexSingularDiv $1 $3 } 
+        | IndexExpression "//" IndexExpression          { IndexTwoDiv $1 $3 } 
+        | IndexExpression '%' IndexExpression           { IndexPercent $1 $3 } 
+        | IndexExpression '^' IndexExpression           { IndexExpo $1 $3 }
 
-
-
-Strings : var ',' Strings                               { StringMultiple $1 $3 }
-        | var                                           { StringSingular $1 }
-
-AlphaNumericStrings : AlphaNumericString                { AStringSingular $1 }
-        | AlphaNumericString AlphaNumericStrings        { AStringMultiple $1 $2 }
-
-AlphaNumericString : var                                { String1 $1}
-
-Number : '+' int                                        { PositiveWhole $2 }
-        | '+' int '.' int                               { PositiveDecimal $2 $4 }
-        | '-' int                                       { NegativeWhole $2 }
-        | '-' int '.' int                               { NegativeDecimal $2 $4 }
+Number : positiveNum                                    { PositiveNumber }
+        | negativeNum                                   { NegativeNumber }
 
 {
 parseError :: [PosnToken] -> a
@@ -196,16 +215,16 @@ data TableAssignment = NoLabels TableName
                 | WithLabels TableName ColumnLabels
                 deriving Show
 
-data TableName = TableRef AlphaNumericString deriving Show
+data TableName = TableRef String deriving Show
 
-data Tables = TablesMultiple TableName Tables 
-                | TableSingular TableName
-                deriving Show 
+--data Tables = TablesMultiple TableName Tables 
+--                | TableSingular TableName
+--                deriving Show 
 
-data ColumnLabels = LabelConstructor AlphaNumericStrings deriving Show
+data ColumnLabels = LabelConstructor String deriving Show
 
-data ColumnReference = AlphaColumn TableName AlphaNumericString
-                | IntegerColumn TableName IntegerAssignment
+data ColumnReference = AlphaColumn TableName String
+                | IntegerColumn TableName Int
                 deriving Show
 
 data Output = OutputConstruct TableName OutputType deriving Show
@@ -226,23 +245,27 @@ data TableExpression = SingleTable TableName
                 | SingleTableExpression TableExpression
                 deriving Show
 
-data Query = Merge
-                | Select Selection
-                | Product
-                | Sort TableName
+data Query = Merge TableName TableName BooleanExpression
+                | Select 
+                | Product TableName TableName
+                | Sort TableName SortClause
                 | Insert String TableName Position
                 | Fill String TableName Axis
                 | Delete TableName Axis
                 | Clear TableName Position
+                | AddBank TableName Axis
                 deriving Show
 
 
-data Axis = Column Int
+data Axis = ColumnInt Int
+                | ColumnAlpha String
                 | Row Int
                 deriving Show
 
 
-data Selection = Select MaxClause Distinct ColumnChoice TableExpression WhereClause PlusClause deriving Show
+data Selection = Selecter MaxClause Distinct ColumnChoice TableExpression WhereClause PlusClause deriving Show
+
+data SortClause = SortASC | SortDesc deriving Show
 
 data MaxClause = MaxTrue Number
                 | MaxFalse
@@ -299,20 +322,9 @@ data IndexExpression = IndexSingular
                 | IndexExpo IndexExpression IndexExpression
                 deriving Show
 
-data Strings = StringMultiple String Strings
-                | StringSingular String
+
+data Number = PositiveNumber 
+                | NegativeNumber 
                 deriving Show
-
-data AlphaNumericStrings = AStringSingular AlphaNumericString
-                | AStringMultiple AlphaNumericString AlphaNumericStrings
-                deriving Show
-
-data AlphaNumericString = String1 String deriving Show
-
-data Number = PositiveWhole Integer
-                | PositiveDecimal Integer Integer
-                | NegativeWhole Integer
-                | NegativeDecimal Integer
-
 
 }
