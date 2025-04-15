@@ -1,11 +1,11 @@
-{INPUT FILE "A.csv" AS a NOLABELS}
+{INPUT FILE "A.csv" AS aa NOLABELS}
 LET permutationDropMatch BE
-    SELECT COLUMNS a.3, a.1
-    FROM a
-    WHERE a.1 = a.2 
+    SELECT COLUMN aa.3, COLUMN aa.1
+    FROM aa
+    WHERE aa.1 = aa.2 
     -
 LET sortedPermutationDropMatch BE
-    SORT permutationDropMatch
+    SORT permutationDropMatch ASC
     -
 QUERIESEND
 OUTPUT sortedPermutationDropMatch TO STANDARD

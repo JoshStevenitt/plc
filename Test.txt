@@ -1,9 +1,10 @@
-{ INPUT FILE "A.csv" AS a NOLABELS, INPUT FILE "B.csv" AS b NOLABELS }
-LET crossProduct BE
-    PRODUCT a b
+{INPUT FILE "P.csv" AS pp NOLABELS, INPUT FILE "Q.csv" AS qq NOLABELS}
+LET merge BE
+    MERGE pp qq 
+    WITHCONSTRAINT pp.1 = qq.1
     -
-LET sortedCrossProduct BE
-    SORT crossProduct ASC
+LET sortedMerge BE
+    SORT merge ASC
     -
 QUERIESEND
-OUTPUT sortedCrossProduct TO STANDARD
+OUTPUT sortedMerge TO STANDARD
