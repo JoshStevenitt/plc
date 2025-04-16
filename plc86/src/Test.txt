@@ -1,0 +1,10 @@
+{INPUT FILE "P.csv" AS pp NOLABELS, INPUT FILE "Q.csv" AS qq NOLABELS}
+LET merge BE
+    MERGE pp qq 
+    WITHCONSTRAINT pp.1 = qq.1
+    -
+LET sortedMerge BE
+    SORT merge ASC
+    -
+QUERIESEND
+OUTPUT sortedMerge TO STANDARD
