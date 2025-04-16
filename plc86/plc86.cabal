@@ -9,9 +9,9 @@ version:        0.1.0.0
 description:    Alex and Happy project.
 homepage:       https://github.com/githubuser/plc86#readme
 bug-reports:    https://github.com/githubuser/plc86/issues
-author:         Author name here
-maintainer:     example@example.com
-copyright:      2025 Author name here
+author:         Josh Stevenitt, Ayodotun Lanipekun, Henry Skinner 
+maintainer:     js19g23@soton.ac.uk, al8g23@soton.ac.uk, hs12g21@soton.ac.uk
+copyright:      2025 Josh Stevenitt, Ayodotun Lanipekun, Henry Skinner
 license:        BSD-3-Clause
 license-file:   LICENSE
 build-type:     Simple
@@ -25,7 +25,10 @@ source-repository head
 
 library
   exposed-modules:
+      Grammar
+      Lexer
       Lib
+      Test
   other-modules:
       Paths_plc86
   autogen-modules:
