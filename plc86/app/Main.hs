@@ -1,8 +1,7 @@
 module Main (
     main
   ) where
-
-import Lib (introMessage)
+    
 import Lexer
 import Grammar
 import System.IO

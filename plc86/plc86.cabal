@@ -28,7 +28,6 @@ library
       Grammar
       Lexer
       Lib
-      Test
   other-modules:
       Paths_plc86
   autogen-modules:

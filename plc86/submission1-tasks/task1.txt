@@ -1,0 +1,9 @@
+{ INPUT FILE "A.csv" AS aa NOLABELS, INPUT FILE "B.csv" AS bb NOLABELS } 
+LET crossProduct BE 
+    PRODUCT aa bb 
+    -
+LET sortedCrossProduct BE
+    SORT crossProduct ASC
+    -
+QUERIESEND
+OUTPUT sortedCrossProduct TO STANDARD
