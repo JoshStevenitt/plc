@@ -51,7 +51,7 @@ evalInputs (InputSingle input) = do
 evalInputs (InputsCons input inputs) = do
                                         singleInput <- evalInputSingle input
                                         remainingInputs <- evalInputs inputs
-                                        return (singleInput:remainingInputs)
+                                        return (updateTableEnvironment singleInput remainingInputs)
 
 --Evaluates a single input, and outputs a single assignment between a table name and a table 
 evalInputSingle :: Input -> IO TableVariable
@@ -97,8 +97,12 @@ evalQueries queries tableEnvironment = case queries of
 --Adds a new TableVariable to a given TableEnvironment
 --If the new table has the same name as one that already exists in the environment, it replaces the old one                                                                                  
 updateTableEnvironment :: TableVariable -> TableEnvironment -> TableEnvironment
-updateTableEnvironment tableVariable tableEnvironment = undefined
-
+updateTableEnvironment tableVariable tableEnvironment | newTableName `elem` (map fst tableEnvironment) = [ (name, outputTable) | (name, table) <- tableEnvironment,
+                                                                                                          let outputTable | name == newTableName = newTable
+                                                                                                                          | otherwise = table]
+                                                      | otherwise = tableVariable:tableEnvironment
+  where
+    (newTableName,newTable) = tableVariable
 evalQuery :: Query -> TableEnvironment -> TableContent
 evalQuery query tableEnvironment = undefined
 
