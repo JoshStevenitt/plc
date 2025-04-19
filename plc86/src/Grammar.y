@@ -242,7 +242,7 @@ data OutputType = Standard
 
 data Position = Comma Int Int deriving Show
 
-data Queries = QueryLet TableName Query Queries
+data Queries = QueryLet TableAssignment Query Queries
                 | QueryEnd
                 deriving Show
 
@@ -253,7 +253,7 @@ data TableExpression = SingleTable TableName
                 deriving Show
 
 data Query = Merge TableName TableName BooleanExpression
-                | Select 
+                | Select Selection
                 | Product TableName TableName
                 | Sort TableName SortClause
                 | Insert String TableName Position
