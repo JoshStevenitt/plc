@@ -113,7 +113,7 @@ TableName : alphaNumericString                          { TableRef $1 }
 
 ColumnLabels : '[' ColumnLabels2 ']'                    { LabelConstructor $2 }
 
-ColumnLabels2 : alphaNumericString ',' ColumnLabels2    { LabelsMultiple $1 $2}
+ColumnLabels2 : alphaNumericString ',' ColumnLabels2    { LabelsMultiple $1 $3}
                 | alphaNumericString                    { LabelSingular $1} 
 
 ColumnReference : TableName '.' alphaNumericString      { AlphaColumn $1 $3 }
