@@ -111,7 +111,7 @@ TableName : alphaNumericString                          { TableRef $1 }
 --        | TableName                                     { TableSingular $1 }
 --
 
-ColumnLabels : '[' alphaNumericString ']'               { LabelConstructor $2 }
+ColumnLabels : '[' ColumnLabels2 ']'                    { LabelConstructor $2 }
 
 ColumnLabels2 : alphaNumericString ',' ColumnLabels2    { LabelsMultiple $1 $2}
                 | alphaNumericString                    { LabelSingular $1} 
@@ -224,7 +224,7 @@ data TableName = TableRef String deriving Show
 --                | TableSingular TableName
 --                deriving Show 
 
-data ColumnLabels = LabelConstructor String deriving Show
+data ColumnLabels = LabelConstructor ColumnLabels2 deriving Show
 
 data ColumnLabels2 = LabelsMultiple String ColumnLabels2 
                 | LabelSingular String
