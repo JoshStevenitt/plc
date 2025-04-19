@@ -6,6 +6,7 @@ import Lexer
 import Grammar
 import System.IO
 import System.Environment
+import Data.String.Utils
 
 
 
@@ -17,7 +18,8 @@ type RowData = [String]
 
 data Table = T TableContent Labels deriving (Read, Show)
 
-type TableEnvironment = [(String,Table)]
+type TableVariable = (String, Table)
+type TableEnvironment = [TableVariable]
 
 main :: IO()
 main = do
@@ -52,30 +54,53 @@ evalInputs (InputsCons input inputs) = do
                                         return (singleInput:remainingInputs)
 
 --Evaluates a single input, and outputs a single assignment between a table name and a table 
-evalInputSingle :: Input -> IO (String,Table)
+evalInputSingle :: Input -> IO TableVariable
 evalInputSingle (Input filename tableAssignment) = do
                                                 fileContent <- readFile filename
                                                 let tableContent = getTableContent fileContent
-                                                let (tableName,labels) = case tableAssignment of
-                                                                            NoLabels (TableRef name) -> (name, [])
-                                                                            WithLabels (TableRef name) columnLabels -> (name, evalColumnLabels columnLabels)
-                                                let table = T tableContent labels
-                                                return (tableName,table)
+                                                let tableVariable = makeTableVariable tableAssignment tableContent
+                                                return tableVariable
+
+--Creates an association between a table and its name from a table assignment and table content
+makeTableVariable :: TableAssignment -> TableContent -> TableVariable
+makeTableVariable tableAssignment tableContent = (tableName, table)
+  where
+    (tableName,labels) = case tableAssignment of
+                            NoLabels (TableRef name) -> (name, [])
+                            WithLabels (TableRef name) columnLabels -> (name, evalColumnLabels columnLabels)
+    table = T tableContent labels
 
 --Converts a string in csv format into a table
 getTableContent :: String -> TableContent
 getTableContent fileContent = finalTable
   where
     stringRows = lines fileContent
-    finalTable = undefined
+    finalTable = map (split ",") stringRows
 
 --Evaluates a list of column labels, re-representing them as strings
+--Gives an error if the number of labels doesn't match the number of columns
 evalColumnLabels :: ColumnLabels -> Labels
 evalColumnLabels columnLabels = undefined
 
 --Evaluates a list of queries on a given TableEnvironment, and ouptuts a new TableEnvironment with the results from the queries
 evalQueries :: Queries -> TableEnvironment -> TableEnvironment
-evalQueries queries tableEnvironment = undefined
+evalQueries queries tableEnvironment = case queries of
+                                        QueryLet tableAssignment query remainingQueries -> 
+                                                evalQueries remainingQueries newTableEnvironment
+                                                where
+                                                  newTable = makeTableVariable tableAssignment (evalQuery query tableEnvironment)
+                                                  newTableEnvironment = 
+                                                      updateTableEnvironment newTable tableEnvironment
+                                                      
+                                        QueryEnd -> tableEnvironment
+
+--Adds a new TableVariable to a given TableEnvironment
+--If the new table has the same name as one that already exists in the environment, it replaces the old one                                                                                  
+updateTableEnvironment :: TableVariable -> TableEnvironment -> TableEnvironment
+updateTableEnvironment tableVariable tableEnvironment = undefined
+
+evalQuery :: Query -> TableEnvironment -> TableContent
+evalQuery query tableEnvironment = undefined
 
 --Evaluates an output expression using a table environment, and outputs a specified table to a specified output channel
 -- The output channels supported are standard output and outputting to a file with a specified name
@@ -87,11 +112,11 @@ evalOutput (OutputConstruct (TableRef tableName) outputType) tableEnvironment = 
                                                                     Standard -> print stringTable
                                                                     File filename -> writeFile filename stringTable
                                                                   
-
+--Reformats a table into a string
 tableToString :: Table -> String
 tableToString (T tablecontent _) = finalTable
   where
-    rowStrings = undefined
+    rowStrings = map (join ",") tablecontent
     finalTable = unlines rowStrings
 
 
