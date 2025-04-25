@@ -139,7 +139,7 @@ TableExpression : TableName                             { SingleTable $1 }
         | '(' TableExpression ')'                       { SingleTableExpression $2 }
 
 Query : MERGE TableName TableName WITHCONSTRAINT BooleanExpression { Merge $2 $3 $5 }
-      | SELECT Selection                                { Select $2}
+      | Selection                                       { SelecterQuery $1}
       | PRODUCT TableName TableName                     { Product $2 $3 }
       | SORT TableName SortClause                       { Sort $2 $3 }
       | INSERT var TableName Position                   { Insert $2 $3 $4 }
@@ -253,7 +253,7 @@ data TableExpression = SingleTable TableName
                 deriving Show
 
 data Query = Merge TableName TableName BooleanExpression
-                | Select Selection
+                | SelecterQuery Selection
                 | Product TableName TableName
                 | Sort TableName SortClause
                 | Insert String TableName Position
