@@ -204,7 +204,10 @@ Number : positiveNum                                    { PositiveNumber }
 
 {
 parseError :: [PosnToken] -> a
-parseError _ = error "Parse error"
+parseError tokens = error ("Parse error at line " ++ (show ln) ++ " column " ++ (show col))
+    where
+        PT position _ = head tokens
+        AlexPn ch ln col = position
 
 data Start = Start Inputs Queries Output deriving Show
 
