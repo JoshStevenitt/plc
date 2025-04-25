@@ -123,7 +123,7 @@ evalOutput (OutputConstruct (TableRef tableName) outputType) tableEnvironment = 
                                                                   let table = lookupTable tableName tableEnvironment
                                                                   let stringTable = tableToString table
                                                                   case outputType of
-                                                                    Standard -> print stringTable
+                                                                    Standard -> putStr stringTable
                                                                     File filename -> writeFile filename stringTable
 
 --Reformats a table into a string
