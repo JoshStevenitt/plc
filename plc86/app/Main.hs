@@ -62,13 +62,20 @@ evalInputSingle (Input filename tableAssignment) = do
                                                 return tableVariable
 
 --Creates an association between a table and its name from a table assignment and table content
+--Gives an error if the number of labels doesn't match the number of columns
+--Gives an error if the number of columns doesn't match for every row
 makeTableVariable :: TableAssignment -> TableContent -> TableVariable
-makeTableVariable tableAssignment tableContent = (tableName, table)
+makeTableVariable tableAssignment tableContent = (tableName, read tableString)
   where
     (tableName,labels) = case tableAssignment of
                             NoLabels (TableRef name) -> (name, [])
-                            WithLabels (TableRef name) columnLabels -> (name, evalColumnLabels columnLabels)
-    table = T tableContent labels
+                            WithLabels (TableRef name) (LabelConstructor columnLabels) -> (name, evalColumnLabels columnLabels)
+    tableString | not (all ((== length (head tableContent)) . length) tableContent) 
+                = error "The number of columns in the table '" ++ tableName ++ "' are not the same for all rows."
+          | (not $ null labels) && (not (length (head tableContent) == length labels)) 
+                = error "The number of labels does not match the number of columns for table '" ++ tableName ++ "'"
+          | otherwise = show (T tableContent labels)
+
 
 --Converts a string in csv format into a table
 getTableContent :: String -> TableContent
@@ -77,21 +84,24 @@ getTableContent fileContent = finalTable
     stringRows = lines fileContent
     finalTable = map (split ",") stringRows
 
+
 --Evaluates a list of column labels, re-representing them as strings
---Gives an error if the number of labels doesn't match the number of columns
-evalColumnLabels :: ColumnLabels -> Labels
-evalColumnLabels columnLabels = undefined
+evalColumnLabels :: ColumnLabels2 -> Labels
+evalColumnLabels columnLabels = evalColumnLabelsHelp columnLabels 1
+  where
+    evalColumnLabelsHelp (LabelSingular label) x = [(label, x)]
+    evalColumnLabelsHelp (LabelsMultiple label remainingColumnLabels) x = (label, x):(evalColumnLabelsHelp remainingColumnLabels (x+1))
 
 --Evaluates a list of queries on a given TableEnvironment, and ouptuts a new TableEnvironment with the results from the queries
 evalQueries :: Queries -> TableEnvironment -> TableEnvironment
 evalQueries queries tableEnvironment = case queries of
-                                        QueryLet tableAssignment query remainingQueries -> 
+                                        QueryLet tableAssignment query remainingQueries ->
                                                 evalQueries remainingQueries newTableEnvironment
                                                 where
                                                   newTable = makeTableVariable tableAssignment (evalQuery query tableEnvironment)
-                                                  newTableEnvironment = 
+                                                  newTableEnvironment =
                                                       updateTableEnvironment newTable tableEnvironment
-                                                      
+
                                         QueryEnd -> tableEnvironment
 
 --Adds a new TableVariable to a given TableEnvironment
@@ -115,7 +125,7 @@ evalOutput (OutputConstruct (TableRef tableName) outputType) tableEnvironment = 
                                                                   case outputType of
                                                                     Standard -> print stringTable
                                                                     File filename -> writeFile filename stringTable
-                                                                  
+
 --Reformats a table into a string
 tableToString :: Table -> String
 tableToString (T tablecontent _) = finalTable
@@ -150,7 +160,7 @@ getColumn reference environment = dataInColumn
   where
     (TableRef tableName, column, refIsLabel) = case reference of
                                   AlphaColumn name string -> (name, string, True)
-                                  IntegerColumn name index -> (name, show index, False)
+                                  IntegerColumn name number -> (name, show number, False)
     T tableContent labels = lookupTable tableName environment
     index | refIsLabel = lookupLabel column labels
           | otherwise = read column
