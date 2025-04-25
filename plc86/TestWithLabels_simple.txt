@@ -1,0 +1,3 @@
+{INPUT FILE "P.csv" AS pp WITHLABELS [first, second, third], INPUT FILE "Q.csv" AS qq NOLABELS}
+QUERIESEND
+OUTPUT pp TO STANDARD
