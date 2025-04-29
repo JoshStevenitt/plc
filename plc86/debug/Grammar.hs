@@ -529,7 +529,7 @@ happyReduction_34 (HappyAbsSyn15  happy_var_3)
         (HappyAbsSyn8  happy_var_2)
         _
          =  HappyAbsSyn18
-                 (AddBank happy_var_2 happy_var_3
+                 (AddBlank happy_var_2 happy_var_3
         )
 happyReduction_34 _ _ _  = notHappyAtAll 
 
@@ -1100,7 +1100,7 @@ data Query = Merge TableName TableName BooleanExpression
                 | Fill String TableName Axis
                 | Delete TableName Axis
                 | Clear TableName Position
-                | AddBank TableName Axis
+                | AddBlank TableName Axis
                 deriving Show
 
 

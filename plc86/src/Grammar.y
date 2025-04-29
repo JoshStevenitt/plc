@@ -146,7 +146,7 @@ Query : MERGE TableName TableName WITHCONSTRAINT BooleanExpression { Merge $2 $3
       | FILL var TableName Axis                         { Fill $2 $3 $4 }
       | DELETE TableName Axis                           { Delete $2 $3 }
       | CLEAR TableName Position                        { Clear $2 $3 }
-      | ADDBLANKTO TableName Axis                       { AddBank $2 $3}
+      | ADDBLANKTO TableName Axis                       { AddBlank $2 $3}
 
 Selection : SELECT MaxClause Distinct ColumnChoice FROM TableExpression WhereClause PlusClause {Selecter $2 $3 $4 $6 $7 $8}
 
@@ -263,7 +263,7 @@ data Query = Merge TableName TableName BooleanExpression
                 | Fill String TableName Axis
                 | Delete TableName Axis
                 | Clear TableName Position
-                | AddBank TableName Axis
+                | AddBlank TableName Axis
                 deriving Show
 
 
