@@ -1,0 +1,6 @@
+{INPUT FILE "numbers.csv" AS nums NOLABELS}
+LET sorted NOLABELS BE
+    SORT nums ASC
+    -
+QUERIESEND
+OUTPUT sorted TO STANDARD
