@@ -1,3 +1,5 @@
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+{-# HLINT ignore "Use tuple-section" #-}
 module Main (
     main
   ) where
@@ -7,6 +9,7 @@ import Grammar
 import System.IO
 import System.Environment
 import Data.String.Utils
+import Data.List
 
 
 
@@ -70,9 +73,9 @@ makeTableVariable tableAssignment tableContent = (tableName, read tableString)
     (tableName,labels) = case tableAssignment of
                             NoLabels (TableRef name) -> (name, [])
                             WithLabels (TableRef name) (LabelConstructor columnLabels) -> (name, evalColumnLabels columnLabels)
-    tableString | not (all ((== length (head tableContent)) . length) tableContent) 
+    tableString | not (all ((== length (head tableContent)) . length) tableContent)
                 = error "The number of columns in the table '" ++ tableName ++ "' are not the same for all rows."
-          | (not $ null labels) && (not (length (head tableContent) == length labels)) 
+          | (not $ null labels) && (not (length (head tableContent) == length labels))
                 = error "The number of labels does not match the number of columns for table '" ++ tableName ++ "'"
           | otherwise = show (T tableContent labels)
 
@@ -113,8 +116,64 @@ updateTableEnvironment tableVariable tableEnvironment | newTableName `elem` (map
                                                       | otherwise = tableVariable:tableEnvironment
   where
     (newTableName,newTable) = tableVariable
+
+--Evaluates a single query.
+--Matches the query given to the relevant evaluation function, and returns the resulting table
 evalQuery :: Query -> TableEnvironment -> TableContent
-evalQuery query tableEnvironment = undefined
+evalQuery query tableEnvironment = case query of
+                                    Merge tableName1 tableName2 mergeConstraint -> evalMerge tableName1 tableName2 mergeConstraint tableEnvironment
+                                    SelecterQuery selection -> evalSelect selection tableEnvironment
+                                    Product tableName1 tableName2 -> evalProduct tableName1 tableName2 tableEnvironment
+                                    Sort tableName sortClause -> evalSort tableName sortClause tableEnvironment
+                                    Insert string tableName position -> evalInsert string tableName position tableEnvironment
+                                    Fill string tableName axis -> evalFill string tableName axis tableEnvironment
+                                    Delete tableName axis -> evalDelete tableName axis tableEnvironment
+                                    Clear tableName position -> evalClear tableName position tableEnvironment
+                                    AddBlank tableName axis -> evalAddBlank tableName axis tableEnvironment
+
+evalMerge :: TableName -> TableName -> BooleanExpression -> TableEnvironment -> TableContent
+evalMerge = undefined
+
+evalSelect :: Selection -> TableEnvironment -> TableContent
+evalSelect = undefined
+
+evalProduct :: TableName -> TableName -> TableEnvironment -> TableContent
+evalProduct = undefined
+
+evalSort :: TableName -> SortClause -> TableEnvironment -> TableContent
+evalSort (TableRef tableName) sortClause tableEnvironment = finalTable
+  where
+    table = lookupTable tableName tableEnvironment
+    T tableContent _ = table
+    reformattedTable = map (\x -> ([],x)) tableContent
+    sortedFormattedTable = case sortClause of
+                            SortASC -> sortTable reformattedTable
+                            SortDesc -> reverse reformattedTable
+    finalTable = map fst sortedFormattedTable
+
+sortTable :: [([String],[String])] -> [([String],[String])]
+sortTable formattedTable | null (snd (head formattedTable)) = formattedTable
+                          | otherwise = sortTable [ newRow | row <- sortOn (head.snd) formattedTable,
+                                                      let newRow = (fst row ++ [head (snd row)], tail (snd row))]
+
+
+
+
+evalInsert :: String -> TableName -> Position -> TableEnvironment -> TableContent
+evalInsert = undefined
+
+evalFill :: String -> TableName -> Axis -> TableEnvironment -> TableContent
+evalFill = undefined
+
+evalDelete :: TableName -> Axis -> TableEnvironment -> TableContent
+evalDelete = undefined
+
+evalClear :: TableName -> Position -> TableEnvironment -> TableContent
+evalClear = undefined
+
+evalAddBlank :: TableName -> Axis -> TableEnvironment -> TableContent
+evalAddBlank = undefined
+
 
 --Evaluates an output expression using a table environment, and outputs a specified table to a specified output channel
 -- The output channels supported are standard output and outputting to a file with a specified name
