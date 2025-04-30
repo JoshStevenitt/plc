@@ -1,4 +1,4 @@
-{INPUT FILE "sortingTest.csv" AS nums NOLABELS}
+{INPUT FILE "names.csv" AS nums NOLABELS}
 LET sorted NOLABELS BE
     SORT nums ASC
     -
