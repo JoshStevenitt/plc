@@ -79,6 +79,10 @@ makeTableVariable tableAssignment tableContent = (tableName, read tableString)
                 = error "The number of labels does not match the number of columns for table '" ++ tableName ++ "'"
           | otherwise = show (T tableContent labels)
 
+--Returns the tablename given by a table variable
+tableAssignmentToTableName :: TableAssignment -> TableName
+tableAssignmentToTableName (NoLabels tableName) = tableName
+tableAssignmentToTableName (WithLabels tableName _) = tableName
 
 --Converts a string in csv format into a table
 getTableContent :: String -> TableContent
@@ -135,13 +139,47 @@ evalMerge :: TableName -> TableName -> BooleanExpression -> TableEnvironment -> 
 evalMerge = undefined
 
 evalSelect :: Selection -> TableEnvironment -> TableContent
-evalSelect = undefined
+evalSelect selection tableEnvironment = finalTable
+  where
+    Selecter maxClause distinct columnChoice tableExpression whereClause plusClause = selection
+    (tableAfterFromClause, fromTableEnvironment) = (evalTableExpression tableExpression tableEnvironment)
+    (tableAfterWhereClause, whereTableEnvironment) = undefined
+    tableAfterDistinctClause = undefined
+    tableAfterMaxClause = undefined
+    finalTable = case plusClause of
+                  PlusTrue nextSelection -> 
+                    tableAfterMaxClause ++ (evalSelect nextSelection whereTableEnvironment)
+                  PlusFalse -> tableAfterMaxClause
+
+evalTableExpression :: TableExpression -> TableEnvironment -> (TableName, TableEnvironment)
+evalTableExpression tableExpression tableEnvironment = case tableExpression of
+                                                          SingleTable tableName -> (tableName, tableEnvironment)
+                                                          TableLetQuery tableAssignment query -> (tableAssignmentToTableName tableAssignment, newTableEnvironment)
+                                                            where
+                                                              newTable = makeTableVariable tableAssignment (evalQuery query tableEnvironment)
+                                                              newTableEnvironment = updateTableEnvironment newTable tableEnvironment
+                                                          TableLetJoin tableAssignment joinClause -> (tableAssignmentToTableName tableAssignment, newTableEnvironment)
+                                                            where
+                                                              newTable = makeTableVariable tableAssignment (evalJoin joinClause tableEnvironment)
+                                                              newTableEnvironment = updateTableEnvironment newTable tableEnvironment
+                                                          SingleTableExpression singleTableExpression -> evalTableExpression singleTableExpression tableEnvironment
+
+evalDistinctClause :: Distinct -> TableContent -> TableContent
+evalDistinctClause distinctClause tableContent = undefined
+
+evalMaxClause :: MaxClause -> TableContent -> TableContent
+evalMaxClause (MaxTrue number) tableContent = undefined
+evalMaxClause MaxFalse tableContent = tableContent 
+
+evalJoin :: JoinClause -> TableEnvironment -> TableContent
+evalJoin joinClause tableEnvironment = undefined
+
 
 evalProduct :: TableName -> TableName -> TableEnvironment -> TableContent
 evalProduct = undefined
 
 evalSort :: TableName -> SortClause -> TableEnvironment -> TableContent
-evalSort (TableRef tableName) sortClause tableEnvironment = sortedTable
+evalSort tableName sortClause tableEnvironment = sortedTable
   where
     table = lookupTable tableName tableEnvironment
     T tableContent _ = table
@@ -251,7 +289,7 @@ evalAddBlank (TableRef name) axis environment = case axis of
 --Evaluates an output expression using a table environment, and outputs a specified table to a specified output channel
 -- The output channels supported are standard output and outputting to a file with a specified name
 evalOutput :: Output -> TableEnvironment -> IO()
-evalOutput (OutputConstruct (TableRef tableName) outputType) tableEnvironment = do
+evalOutput (OutputConstruct tableName outputType) tableEnvironment = do
                                                                   let table = lookupTable tableName tableEnvironment
                                                                   let stringTable = tableToString table
                                                                   case outputType of
@@ -268,8 +306,8 @@ tableToString (T tablecontent _) = finalTable
 
 --Finds a table in a given TableEnvironment using the name of the table
 --Gives an error if the key doesn't exist in the environment
-lookupTable :: String -> TableEnvironment -> Table
-lookupTable key environment = read stringTable
+lookupTable :: TableName -> TableEnvironment -> Table
+lookupTable (TableRef key) environment = read stringTable
   where
     lookupOutput = lookup key environment
     stringTable = case lookupOutput of
@@ -290,7 +328,7 @@ lookupLabel key environment = read stringLabel
 getColumn :: ColumnReference -> TableEnvironment -> ColumnData
 getColumn reference environment = dataInColumn
   where
-    (TableRef tableName, column, refIsLabel) = case reference of
+    (tableName, column, refIsLabel) = case reference of
                                   AlphaColumn name string -> (name, string, True)
                                   IntegerColumn name number -> (name, show number, False)
     T tableContent labels = lookupTable tableName environment
