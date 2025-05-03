@@ -199,8 +199,8 @@ IndexExpression : INDEX                                 { IndexSingular }
         | IndexExpression '%' IndexExpression           { IndexPercent $1 $3 } 
         | IndexExpression '^' IndexExpression           { IndexExpo $1 $3 }
 
-Number : positiveNum                                    { PositiveNumber }
-        | negativeNum                                   { NegativeNumber }
+Number : positiveNum                                    { PositiveNumber $1}
+        | negativeNum                                   { NegativeNumber $1}
 
 {
 parseError :: [PosnToken] -> a
@@ -333,8 +333,8 @@ data IndexExpression = IndexSingular
                 deriving Show
 
 
-data Number = PositiveNumber 
-                | NegativeNumber 
+data Number = PositiveNumber String
+                | NegativeNumber String
                 deriving (Show, Read)
 
 }

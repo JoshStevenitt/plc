@@ -918,18 +918,20 @@ happyReduction_73 _ _ _  = notHappyAtAll
 #if __GLASGOW_HASKELL__ >= 710
 #endif
 happyReduce_74 = happySpecReduce_1  27# happyReduction_74
-happyReduction_74 _
+happyReduction_74 (HappyTerminal (PT _ (TokenPositiveNumber happy_var_1)))
          =  HappyAbsSyn31
-                 (PositiveNumber
+                 (PositiveNumber happy_var_1
         )
+happyReduction_74 _  = notHappyAtAll 
 
 #if __GLASGOW_HASKELL__ >= 710
 #endif
 happyReduce_75 = happySpecReduce_1  27# happyReduction_75
-happyReduction_75 _
+happyReduction_75 (HappyTerminal (PT _ (TokenNegativeNumber happy_var_1)))
          =  HappyAbsSyn31
-                 (NegativeNumber
+                 (NegativeNumber happy_var_1
         )
+happyReduction_75 _  = notHappyAtAll 
 
 happyNewToken action sts stk [] =
         happyDoAction 69# notHappyAtAll action sts stk []
@@ -1170,8 +1172,8 @@ data IndexExpression = IndexSingular
                 deriving Show
 
 
-data Number = PositiveNumber 
-                | NegativeNumber 
+data Number = PositiveNumber String
+                | NegativeNumber String
                 deriving (Show, Read)
 -- $Id: GenericTemplate.hs,v 1.26 2005/01/14 14:47:22 simonmar Exp $
 
