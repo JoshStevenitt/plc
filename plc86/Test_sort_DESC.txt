@@ -1,6 +1,6 @@
 {INPUT FILE "sortingTest.csv" AS nums NOLABELS}
 LET sorted NOLABELS BE
-    SORT nums ASC
+    SORT nums DESC
     -
 QUERIESEND
 OUTPUT sorted TO STANDARD

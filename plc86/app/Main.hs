@@ -141,20 +141,20 @@ evalProduct :: TableName -> TableName -> TableEnvironment -> TableContent
 evalProduct = undefined
 
 evalSort :: TableName -> SortClause -> TableEnvironment -> TableContent
-evalSort (TableRef tableName) sortClause tableEnvironment = finalTable
+evalSort (TableRef tableName) sortClause tableEnvironment = sortedTable
   where
     table = lookupTable tableName tableEnvironment
     T tableContent _ = table
-    reformattedTable = map (\x -> ([],x)) tableContent
-    sortedFormattedTable = case sortClause of
-                            SortASC -> sortTable reformattedTable
-                            SortDesc -> reverse reformattedTable
-    finalTable = map fst sortedFormattedTable
+    sortedTable = case sortClause of
+                            SortASC -> sortTable tableContent
+                            SortDesc -> reverse (sortTable tableContent)
 
-sortTable :: [([String],[String])] -> [([String],[String])]
-sortTable formattedTable | null (snd (head formattedTable)) = formattedTable
-                          | otherwise = sortTable [ newRow | row <- sortOn (head.snd) formattedTable,
-                                                      let newRow = (fst row ++ [head (snd row)], tail (snd row))]
+sortTable :: TableContent -> TableContent
+sortTable table = sortedTable
+  where
+    strings = map unlines table
+    sortedStrings = sort strings
+    sortedTable = map lines sortedStrings
 
 
 
