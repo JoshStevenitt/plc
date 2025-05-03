@@ -335,6 +335,6 @@ data IndexExpression = IndexSingular
 
 data Number = PositiveNumber 
                 | NegativeNumber 
-                deriving Show
+                deriving (Show, Read)
 
 }
