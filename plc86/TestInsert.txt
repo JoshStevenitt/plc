@@ -1,0 +1,9 @@
+{INPUT FILE "P.csv" AS aa NOLABELS}
+LET inserted NOLABELS BE
+    INSERT 'foo' aa 1,1
+    -
+LET sortedCopyingAndConstants NOLABELS BE
+    SORT inserted ASC
+    -
+QUERIESEND
+OUTPUT sortedCopyingAndConstants TO STANDARD

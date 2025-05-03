@@ -188,6 +188,9 @@ replaceAt1 i val def row
   | i < length row = take i row ++ [val] ++ drop (i+1) row
   | otherwise = row ++ replicate (i - length row) def ++ [val]
 
+insertAt :: Int -> a -> [a] -> [a]
+insertAt i val xs = take i xs ++ [val] ++ drop i xs
+
 evalDelete :: TableName -> Axis -> TableEnvironment -> TableContent
 evalDelete (TableRef name) axis environment =
   case axis of
@@ -217,10 +220,32 @@ removeAt i xs
   | otherwise = xs
 
 evalClear :: TableName -> Position -> TableEnvironment -> TableContent
-evalClear = undefined
+evalClear (TableRef name) (Comma x y) environment
+  | y < length tableContent && x < length (tableContent !! y) = updatedTable
+  | otherwise = error "evalClear: position out of bounds"
+  where
+    T tableContent _ = lookupTable name environment
+    updatedRow = replaceAt x "" (tableContent !! y)
+    updatedTable = replaceAt y updatedRow tableContent
+
 
 evalAddBlank :: TableName -> Axis -> TableEnvironment -> TableContent
-evalAddBlank = undefined
+evalAddBlank (TableRef name) axis environment = case axis of
+  Row i
+    | i <= length tableContent -> insertAt i blankRow tableContent
+    | otherwise -> error "evalAddBlank: row index out of bounds"
+  ColumnInt i
+    | i <= arity -> map (insertAt i "") tableContent
+    | otherwise -> error "evalAddBlank: column index out of bounds"
+  ColumnAlpha label ->
+    case lookupLabel label labels of
+      i | i <= arity -> map (insertAt i "") tableContent
+        | otherwise -> error "evalAddBlank: column label index out of bounds"
+  where
+    T tableContent labels = lookupTable name environment
+    arity = if null tableContent then 0 else length (head tableContent)
+    blankRow = replicate arity ""
+
 
 
 --Evaluates an output expression using a table environment, and outputs a specified table to a specified output channel
