@@ -1,0 +1,9 @@
+{INPUT FILE "P.csv" AS aa NOLABELS}
+LET deleted NOLABELS BE
+    DELETE aa COLUMN 1
+    -
+LET sortedCopyingAndConstants NOLABELS BE
+    SORT deleted ASC
+    -
+QUERIESEND
+OUTPUT sortedCopyingAndConstants TO STANDARD

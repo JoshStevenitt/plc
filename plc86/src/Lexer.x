@@ -82,7 +82,7 @@ tokens :-
   [$digit]+                       { \p s -> PT p (TokenDigits s) }
   [\+]? $digit+ (\. $digit+)?     { \p s -> PT p (TokenPositiveNumber s) }
   [\-]? $digit+ (\. $digit+)?     { \p s -> PT p (TokenNegativeNumber s) }
-  \'[$char]*\'                    { \p s -> PT p (TokenString s) }
+  \'[$char]*\'                    { \p s -> PT p (TokenString (init (tail s))) }
 {
 data PosnToken = PT AlexPosn Token deriving (Eq, Show)
 

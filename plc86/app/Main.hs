@@ -160,13 +160,61 @@ sortTable formattedTable | null (snd (head formattedTable)) = formattedTable
 
 
 evalInsert :: String -> TableName -> Position -> TableEnvironment -> TableContent
-evalInsert = undefined
+evalInsert str (TableRef name) (Comma x y) environment
+  | y < length tableContent && x < length (tableContent !! y) = updatedTable
+  | otherwise = error "evalInsert: position out of bounds"
+  where
+    T tableContent _ = lookupTable name environment
+    updatedRow = replaceAt x str (tableContent !! y)
+    updatedTable = replaceAt y updatedRow tableContent
+
 
 evalFill :: String -> TableName -> Axis -> TableEnvironment -> TableContent
-evalFill = undefined
+evalFill fillstr (TableRef name) axis environment = updated
+  where
+    T tableContent labels = lookupTable name environment
+    columnIndex = case axis of
+                ColumnInt n -> n 
+                ColumnAlpha label -> lookupLabel label labels
+                Row _ -> error "evalFill: Cannot fill based on row axis"
+    updated = map (replaceAt1 columnIndex fillstr "" ) tableContent
+
+
+replaceAt :: Int -> a -> [a] -> [a]
+replaceAt i val xs = take i xs ++ [val] ++ drop (i + 1) xs
+
+replaceAt1 :: Int -> a -> a -> [a] -> [a]
+replaceAt1 i val def row
+  | i < length row = take i row ++ [val] ++ drop (i+1) row
+  | otherwise = row ++ replicate (i - length row) def ++ [val]
 
 evalDelete :: TableName -> Axis -> TableEnvironment -> TableContent
-evalDelete = undefined
+evalDelete (TableRef name) axis environment =
+  case axis of
+    Row i
+      | i < length tableContent -> deleteRow i tableContent
+      | otherwise -> error "evalDelete: row index out of bounds"
+    ColumnInt i
+      | i < arity -> deleteColumn i tableContent
+      | otherwise -> error "evalDelete: column index out of bounds"
+    ColumnAlpha label ->
+      case lookupLabel label labels of
+        i | i < arity -> deleteColumn i tableContent
+          | otherwise -> error "evalDelete: column label index out of bounds"
+  where
+    T tableContent labels = lookupTable name environment
+    arity = if null tableContent then 0 else length (head tableContent)
+
+deleteRow :: Int -> [[a]] -> [[a]]
+deleteRow i table = take i table ++ drop (i + 1) table
+
+deleteColumn :: Int -> [[a]] -> [[a]]
+deleteColumn i = map (removeAt i)
+
+removeAt :: Int -> [a] -> [a]
+removeAt i xs
+  | i < length xs = take i xs ++ drop (i + 1) xs
+  | otherwise = xs
 
 evalClear :: TableName -> Position -> TableEnvironment -> TableContent
 evalClear = undefined
