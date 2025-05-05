@@ -1,10 +1,10 @@
 {INPUT FILE "A.csv" AS aa NOLABELS}
-LET existenceCheck BE
+LET existenceCheck NOLABELS BE
     SELECT COLUMNS *
     FROM aa
     WHERE NOT (aa.2 = '') 
     -
-LET sortedExistenceCheck BE
+LET sortedExistenceCheck NOLABELS BE
     SORT existenceCheck ASC
     -
 QUERIESEND

@@ -200,7 +200,13 @@ evalJoin joinClause tableEnvironment = undefined
 
 
 evalProduct :: TableName -> TableName -> TableEnvironment -> TableContent
-evalProduct = undefined
+evalProduct (TableRef name1) (TableRef name2) environment = 
+  [ map strip row1 ++ map strip row2 | row1 <- tableContent1, row2 <- tableContent2 ]
+  where
+    T tableContent1 _ = lookupTable (TableRef name1) environment
+    T tableContent2 _ = lookupTable (TableRef name2) environment
+
+
 
 evalSort :: TableName -> SortClause -> TableEnvironment -> TableContent
 evalSort tableName sortClause tableEnvironment = sortedTable

@@ -1,15 +1,15 @@
 {INPUT FILE "A.csv" AS aa NOLABELS}
-LET newColumn BE
+LET newColumn NOLABELS BE
     ADDBLANKTO aa COLUMN 2
     -
-LET fooColumn BE
+LET fooColumn NOLABELS BE
     FILL 'foo' newColumn COLUMN 2
     -
-LET copyingAndConstants BE
+LET copyingAndConstants NOLABELS BE
     SELECT COLUMN aa.1, COLUMN aa.2, COLUMN aa.1
     FROM aa
     -
-LET sortedCopyingAndConstants BE
+LET sortedCopyingAndConstants NOLABELS BE
     SORT copyingAndConstants ASC
     -
 QUERIESEND
