@@ -143,9 +143,11 @@ evalSelect selection tableEnvironment = finalTable
   where
     Selecter maxClause distinct columnChoice tableExpression whereClause plusClause = selection
     (tableAfterFromClause, fromTableEnvironment) = (evalTableExpression tableExpression tableEnvironment)
-    (tableAfterWhereClause, whereTableEnvironment) = undefined
-    tableAfterDistinctClause = undefined
-    tableAfterMaxClause = undefined
+    (tableAfterColumnChoice, columnTableEnvironment) = evalColumnChoice columnChoice tableAfterFromClause fromTableEnvironment
+    (tableAfterWhereClause, whereTableEnvironment) = evalWhereClause whereClause tableAfterColumnChoice columnTableEnvironment
+    T whereClauseTableContent _ = lookupTable tableAfterWhereClause whereTableEnvironment
+    tableAfterDistinctClause = evalDistinctClause distinct whereClauseTableContent
+    tableAfterMaxClause = evalMaxClause maxClause tableAfterDistinctClause
     finalTable = case plusClause of
                   PlusTrue nextSelection -> 
                     tableAfterMaxClause ++ (evalSelect nextSelection whereTableEnvironment)
@@ -164,11 +166,33 @@ evalTableExpression tableExpression tableEnvironment = case tableExpression of
                                                               newTableEnvironment = updateTableEnvironment newTable tableEnvironment
                                                           SingleTableExpression singleTableExpression -> evalTableExpression singleTableExpression tableEnvironment
 
+evalColumnChoice :: ColumnChoice -> TableName -> TableEnvironment -> (TableName, TableEnvironment)
+evalColumnChoice columnChoice tableAfterFromClause fromTableEnvironment = undefined
+
+evalWhereClause :: WhereClause -> TableName -> TableEnvironment -> (TableName, TableEnvironment)
+evalWhereClause (WhereTrue booleanExpression) tableName tableEnvironment = (tableName, newTableEnvironment)
+  where
+    TableRef name = tableName
+    T tableContent tableLabels = lookupTable tableName tableEnvironment
+    newTableContent = [ row | row <- tableContent,
+                          matchRowToExpression row booleanExpression tableName tableEnvironment]
+    newTable = T newTableContent tableLabels
+    newTableEnvironment = updateTableEnvironment (name, newTable) tableEnvironment
+    
+evalWhereClause WhereFalse tableName tableEnvironment = (tableName, tableEnvironment)
+
+matchRowToExpression :: [String] -> BooleanExpression -> TableName -> TableEnvironment -> Bool
+matchRowToExpression row booleanExpression tableName tableEnvironment = undefined
+
+
+
 evalDistinctClause :: Distinct -> TableContent -> TableContent
-evalDistinctClause distinctClause tableContent = undefined
+evalDistinctClause DistinctTrue tableContent = nub tableContent
+evalDistinctClause DistinctFalse tableContent = tableContent
 
 evalMaxClause :: MaxClause -> TableContent -> TableContent
-evalMaxClause (MaxTrue number) tableContent = undefined
+evalMaxClause (MaxTrue (PositiveNumber num)) tableContent = take (read num) tableContent
+evalMaxClause (MaxTrue _) _ = error "evalMaxClause: input number cannot be negative"
 evalMaxClause MaxFalse tableContent = tableContent 
 
 evalJoin :: JoinClause -> TableEnvironment -> TableContent
@@ -198,19 +222,19 @@ sortTable table = sortedTable
 
 
 evalInsert :: String -> TableName -> Position -> TableEnvironment -> TableContent
-evalInsert str (TableRef name) (Comma x y) environment
+evalInsert str tableName (Comma x y) environment
   | y < length tableContent && x < length (tableContent !! y) = updatedTable
   | otherwise = error "evalInsert: position out of bounds"
   where
-    T tableContent _ = lookupTable name environment
+    T tableContent _ = lookupTable tableName environment
     updatedRow = replaceAt x str (tableContent !! y)
     updatedTable = replaceAt y updatedRow tableContent
 
 
 evalFill :: String -> TableName -> Axis -> TableEnvironment -> TableContent
-evalFill fillstr (TableRef name) axis environment = updated
+evalFill fillstr tableName axis environment = updated
   where
-    T tableContent labels = lookupTable name environment
+    T tableContent labels = lookupTable tableName environment
     columnIndex = case axis of
                 ColumnInt n -> n 
                 ColumnAlpha label -> lookupLabel label labels
@@ -230,7 +254,7 @@ insertAt :: Int -> a -> [a] -> [a]
 insertAt i val xs = take i xs ++ [val] ++ drop i xs
 
 evalDelete :: TableName -> Axis -> TableEnvironment -> TableContent
-evalDelete (TableRef name) axis environment =
+evalDelete tableName axis environment =
   case axis of
     Row i
       | i < length tableContent -> deleteRow i tableContent
@@ -243,7 +267,7 @@ evalDelete (TableRef name) axis environment =
         i | i < arity -> deleteColumn i tableContent
           | otherwise -> error "evalDelete: column label index out of bounds"
   where
-    T tableContent labels = lookupTable name environment
+    T tableContent labels = lookupTable tableName environment
     arity = if null tableContent then 0 else length (head tableContent)
 
 deleteRow :: Int -> [[a]] -> [[a]]
@@ -258,17 +282,17 @@ removeAt i xs
   | otherwise = xs
 
 evalClear :: TableName -> Position -> TableEnvironment -> TableContent
-evalClear (TableRef name) (Comma x y) environment
+evalClear tableName (Comma x y) environment
   | y < length tableContent && x < length (tableContent !! y) = updatedTable
   | otherwise = error "evalClear: position out of bounds"
   where
-    T tableContent _ = lookupTable name environment
+    T tableContent _ = lookupTable tableName environment
     updatedRow = replaceAt x "" (tableContent !! y)
     updatedTable = replaceAt y updatedRow tableContent
 
 
 evalAddBlank :: TableName -> Axis -> TableEnvironment -> TableContent
-evalAddBlank (TableRef name) axis environment = case axis of
+evalAddBlank tableName axis environment = case axis of
   Row i
     | i <= length tableContent -> insertAt i blankRow tableContent
     | otherwise -> error "evalAddBlank: row index out of bounds"
@@ -280,7 +304,7 @@ evalAddBlank (TableRef name) axis environment = case axis of
       i | i <= arity -> map (insertAt i "") tableContent
         | otherwise -> error "evalAddBlank: column label index out of bounds"
   where
-    T tableContent labels = lookupTable name environment
+    T tableContent labels = lookupTable tableName environment
     arity = if null tableContent then 0 else length (head tableContent)
     blankRow = replicate arity ""
 
