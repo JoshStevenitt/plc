@@ -1,5 +1,6 @@
 {-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
 {-# HLINT ignore "Use tuple-section" #-}
+{-# HLINT ignore "Use elemIndex" #-}
 module Main (
     main
   ) where
@@ -10,6 +11,7 @@ import System.IO
 import System.Environment
 import Data.String.Utils
 import Data.List
+
 
 
 
@@ -142,7 +144,69 @@ evalQuery query tableEnvironment = case query of
                                     AddBlank tableName axis -> evalAddBlank tableName axis tableEnvironment
 
 evalMerge :: TableName -> TableName -> BooleanExpression -> TableEnvironment -> TableContent
-evalMerge = undefined
+evalMerge tableName1 tableName2 boolExpr tableEnvironment = newTableContent
+  where
+    T tableContent1 _ = lookupTable tableName1 tableEnvironment
+    T tableContent2 _ = lookupTable tableName2 tableEnvironment
+    newTableContent | length (head tableContent1) /= length (head tableContent2) = error "evalMerge: the input tables have different arities"
+                    | otherwise = [newRow |
+                                    index1 <- [1 .. (length tableContent1)],
+                                    let row1 = tableContent1 !! (index1 - 1),
+                                    index2 <- [1 .. (length tableContent2)],
+                                    let row2 = tableContent2 !! (index2 - 1),
+                                    let newRow = getMergedRow row1 row2,
+                                    matchRowListToExpression
+                                      [row1, row2] [index1,index2] boolExpr [tableName1, tableName2] tableEnvironment]
+
+    getMergedRow row1 row2 = [ item | (item1, item2) <- zip row1 row2,
+                                                        let item | null item1 = item2
+                                                                 | otherwise = item1]
+
+matchRowListToExpression :: [[String]] -> [Int] -> BooleanExpression -> [TableName] -> TableEnvironment -> Bool
+matchRowListToExpression rows indices boolExpr tableNames tableEnvironment = matchRToBoolHelp boolExpr
+  where
+    matchRToBoolHelp :: BooleanExpression -> Bool
+    matchRToBoolHelp (BooleanBracket expression) = matchRToBoolHelp expression
+    matchRToBoolHelp (BooleanAND expression1 expression2)
+       = (matchRToBoolHelp expression1) && (matchRToBoolHelp expression2)
+    matchRToBoolHelp (BooleanOR expression1 expression2)
+       = (matchRToBoolHelp expression1 ) || (matchRToBoolHelp expression2)
+    matchRToBoolHelp (BooleanNOT expression)  = not (matchRToBoolHelp expression)
+    matchRToBoolHelp (BooleanEQ expression1 expression2)
+       = (matchRToBoolHelp expression1) == (matchRToBoolHelp expression2)
+    matchRToBoolHelp (BooleanSubExpression se1 se2)
+       = matchRToSubHelp se1 == matchRToSubHelp se2
+    matchRToBoolHelp (BooleanIndexExpression ie1 ie2)
+       = and [matchRToIndexHelp ie1 tableName == matchRToIndexHelp ie2 tableName | tableName <- tableNames]
+
+
+    matchRToSubHelp (SubString string) = string
+    matchRToSubHelp (SubColumn colRef) = correctRow!!(getLabelIndex colRef tableEnvironment -1)
+      where
+      refTableName = case colRef of
+                      AlphaColumn tn _ -> tn
+                      IntegerColumn tn _ -> tn
+      correctRow = case elemIndex refTableName tableNames of
+                      Just index -> rows!!index
+                      Nothing -> error "The table you are referencing is not accessible here"
+
+
+    matchRToIndexHelp :: IndexExpression -> TableName -> Int
+    matchRToIndexHelp IndexSingular tableName = case elemIndex tableName tableNames of
+                                        Just index -> indices!!index
+                                        Nothing -> error "The table you are referencing is not accessible here"
+    matchRToIndexHelp (IndexNum number) _ = case number of
+                                            PositiveNumber num -> read num
+                                            NegativeNumber num -> read num
+    matchRToIndexHelp (IndexBracket ie) tableName = matchRToIndexHelp ie tableName
+    matchRToIndexHelp (IndexPlus ie1 ie2) tableName = matchRToIndexHelp ie1 tableName + matchRToIndexHelp ie2 tableName
+    matchRToIndexHelp (IndexMinus ie1 ie2) tableName = matchRToIndexHelp ie1 tableName - matchRToIndexHelp ie2 tableName
+    matchRToIndexHelp (IndexMult ie1 ie2) tableName = matchRToIndexHelp ie1 tableName * matchRToIndexHelp ie2 tableName
+    matchRToIndexHelp (IndexIntDiv ie1 ie2) tableName = matchRToIndexHelp ie1 tableName `div` matchRToIndexHelp ie2 tableName
+      --Getting the remainder of a fractional division, similar to mod
+    matchRToIndexHelp (IndexMod ie1 ie2) tableName = matchRToIndexHelp ie1 tableName `mod` matchRToIndexHelp ie2 tableName
+    matchRToIndexHelp (IndexExpo ie1 ie2) tableName = matchRToIndexHelp ie1 tableName ^ matchRToIndexHelp ie2 tableName
+
 
 evalSelect :: Selection -> TableEnvironment -> TableContent
 evalSelect selection tableEnvironment = finalTable
@@ -155,7 +219,7 @@ evalSelect selection tableEnvironment = finalTable
     tableAfterDistinctClause = evalDistinctClause distinct whereClauseTableContent
     tableAfterMaxClause = evalMaxClause maxClause tableAfterDistinctClause
     finalTable = case plusClause of
-                  PlusTrue nextSelection -> 
+                  PlusTrue nextSelection ->
                     tableAfterMaxClause ++ (evalSelect nextSelection whereTableEnvironment)
                   PlusFalse -> tableAfterMaxClause
 
@@ -178,18 +242,19 @@ evalWhereClause (WhereTrue booleanExpression) tableName tableEnvironment = (tabl
   where
     TableRef name = tableName
     T tableContent tableLabels = lookupTable tableName tableEnvironment
-    newTableContent = [ row | row <- tableContent,
-                          matchRowToExpression row 0 booleanExpression tableName tableEnvironment]
+    newTableContent = [ row | index <- [1..(length tableContent)],
+                          let row = tableContent!!(index-1),
+                          matchRowToExpression row index booleanExpression tableName tableEnvironment]
     newTable = T newTableContent tableLabels
     newTableEnvironment = updateTableEnvironment (name, newTable) tableEnvironment
-    
+
 evalWhereClause WhereFalse tableName tableEnvironment = (tableName, tableEnvironment)
 
 matchRowToExpression :: [String] -> Int -> BooleanExpression -> TableName -> TableEnvironment -> Bool
 matchRowToExpression row rowIndex booleanExpression tableName tableEnvironment = matchRToBoolHelp booleanExpression
   where
     matchRToBoolHelp :: BooleanExpression -> Bool
-    matchRToBoolHelp (BooleanBracket expression) = matchRToBoolHelp expression 
+    matchRToBoolHelp (BooleanBracket expression) = matchRToBoolHelp expression
     matchRToBoolHelp (BooleanAND expression1 expression2)
        = (matchRToBoolHelp expression1) && (matchRToBoolHelp expression2)
     matchRToBoolHelp (BooleanOR expression1 expression2)
@@ -197,17 +262,17 @@ matchRowToExpression row rowIndex booleanExpression tableName tableEnvironment =
     matchRToBoolHelp (BooleanNOT expression)  = not (matchRToBoolHelp expression)
     matchRToBoolHelp (BooleanEQ expression1 expression2)
        = (matchRToBoolHelp expression1) == (matchRToBoolHelp expression2)
-    matchRToBoolHelp (BooleanSubExpression se1 se2) 
+    matchRToBoolHelp (BooleanSubExpression se1 se2)
        = matchRToSubHelp se1 == matchRToSubHelp se2
     matchRToBoolHelp (BooleanIndexExpression ie1 ie2)
        = matchRToIndexHelp ie1 == matchRToIndexHelp ie2
-    
-    
+
+
     matchRToSubHelp (SubString string) = string
-    matchRToSubHelp (SubColumn colRef) | tableName /= refTableName = error "The table you are referencing in the where clause is not the same as the one produced in the from clause."
+    matchRToSubHelp (SubColumn colRef) | tableName /= refTableName = error "The table you are referencing in the where clause is not the same as the one produced in the from clause"
                                        | otherwise = row!!(getLabelIndex colRef tableEnvironment -1)
       where
-      refTableName = case colRef of 
+      refTableName = case colRef of
                       AlphaColumn tn _ -> tn
                       IntegerColumn tn _ -> tn
 
@@ -225,7 +290,7 @@ matchRowToExpression row rowIndex booleanExpression tableName tableEnvironment =
       --Getting the remainder of a fractional division, similar to mod
     matchRToIndexHelp (IndexMod ie1 ie2) = matchRToIndexHelp ie1 `mod` matchRToIndexHelp ie2
     matchRToIndexHelp (IndexExpo ie1 ie2) = matchRToIndexHelp ie1 ^ matchRToIndexHelp ie2
-     
+
 
 
 
@@ -237,10 +302,10 @@ evalColumnChoice columnChoice tableName tableEnvironment = (tableName, newTableE
     newTableContent = columnChoiceHelp columnChoice []
     newTable = T newTableContent []
     newTableEnvironment = updateTableEnvironment (name, newTable) tableEnvironment
-    
+
     columnChoiceHelp (ColumnSingle colRef) x = transpose (reverse (getColumn colRef tableEnvironment:x))
     columnChoiceHelp (ColumnMultiple colRef remainingColumnChoice) x = columnChoiceHelp remainingColumnChoice (getColumn colRef tableEnvironment:x)
- 
+
 
 
 evalDistinctClause :: Distinct -> TableContent -> TableContent
@@ -250,14 +315,14 @@ evalDistinctClause DistinctFalse tableContent = tableContent
 evalMaxClause :: MaxClause -> TableContent -> TableContent
 evalMaxClause (MaxTrue (PositiveNumber num)) tableContent = take (read num) tableContent
 evalMaxClause (MaxTrue _) _ = error "evalMaxClause: input number cannot be negative"
-evalMaxClause MaxFalse tableContent = tableContent 
+evalMaxClause MaxFalse tableContent = tableContent
 
 evalJoin :: JoinClause -> TableEnvironment -> TableContent
 evalJoin joinClause tableEnvironment = undefined
 
 
 evalProduct :: TableName -> TableName -> TableEnvironment -> TableContent
-evalProduct (TableRef name1) (TableRef name2) environment = 
+evalProduct (TableRef name1) (TableRef name2) environment =
   [ map strip row1 ++ map strip row2 | row1 <- tableContent1, row2 <- tableContent2 ]
   where
     T tableContent1 _ = lookupTable (TableRef name1) environment
@@ -300,7 +365,7 @@ evalFill fillstr tableName axis environment = updated
     T tableContent labels = lookupTable tableName environment
     arity = if null tableContent then 0 else length (head tableContent)
     columnIndex = case axis of
-                ColumnInt n -> n 
+                ColumnInt n -> n
                 ColumnAlpha label -> lookupLabel label labels
                 Row _ -> error "evalFill: Cannot fill based on row axis"
     updated | columnIndex > 0 && columnIndex <= arity = map (replaceAt1 (columnIndex-1) fillstr "" ) tableContent
