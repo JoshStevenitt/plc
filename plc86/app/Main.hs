@@ -167,7 +167,13 @@ evalTableExpression tableExpression tableEnvironment = case tableExpression of
                                                           SingleTableExpression singleTableExpression -> evalTableExpression singleTableExpression tableEnvironment
 
 evalColumnChoice :: ColumnChoice -> TableName -> TableEnvironment -> (TableName, TableEnvironment)
-evalColumnChoice columnChoice tableAfterFromClause fromTableEnvironment = undefined
+evalColumnChoice ColumnALL tableName tableEnvironment = (tableName, tableEnvironment)
+evalColumnChoice columnChoice tableName tableEnvironment = (tableName, newTableEnvironment)
+  where
+    T tableContent _ = lookupTable tableName tableEnvironment
+    newTableContent = undefined
+    newTable = T newTableContent 
+
 
 evalWhereClause :: WhereClause -> TableName -> TableEnvironment -> (TableName, TableEnvironment)
 evalWhereClause (WhereTrue booleanExpression) tableName tableEnvironment = (tableName, newTableEnvironment)
