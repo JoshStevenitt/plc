@@ -6,8 +6,8 @@ LET fooColumn NOLABELS BE
     FILL 'foo' newColumn COLUMN 2
     -
 LET copyingAndConstants NOLABELS BE
-    SELECT COLUMN aa.1, COLUMN aa.2, COLUMN aa.1
-    FROM aa
+    SELECT COLUMN fooColumn.1, COLUMN fooColumn.2, COLUMN fooColumn.1
+    FROM foo
     -
 LET sortedCopyingAndConstants NOLABELS BE
     SORT copyingAndConstants ASC
