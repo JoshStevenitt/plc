@@ -75,9 +75,9 @@ makeTableVariable tableAssignment tableContent = (tableName, read tableString)
                             NoLabels (TableRef name) -> (name, [])
                             WithLabels (TableRef name) (LabelConstructor columnLabels) -> (name, evalColumnLabels columnLabels)
     tableString | not (all ((== length (head tableContent)) . length) tableContent)
-                = error "The number of columns in the table '" ++ tableName ++ "' are not the same for all rows."
+                = error ("The number of columns in the table '" ++ tableName ++ "' are not the same for all rows.")
           | (not $ null labels) && (not (length (head tableContent) == length labels))
-                = error "The number of labels does not match the number of columns for table '" ++ tableName ++ "'"
+                = error ("The number of labels does not match the number of columns for table '" ++ tableName ++ "'")
           | nub labels /= labels
                 = error "There are multiple labels with the same name in the table, this is not allowed."
           | otherwise = show (T strippedTableContent labels)
@@ -92,8 +92,11 @@ getTableContent :: String -> TableContent
 getTableContent fileContent = finalTable
   where
     stringRows = lines fileContent
-    finalTable = map (split ",") stringRows
+    finalTable = map (customSplit ",") stringRows
 
+customSplit :: Eq a => [a] -> [a] -> [[a]]
+customSplit _ [] = [[]]
+customSplit delimiter list = split delimiter list
 
 --Evaluates a list of column labels, re-representing them as strings
 evalColumnLabels :: ColumnLabels2 -> Labels
@@ -283,23 +286,25 @@ sortTable table = sortedTable
 
 evalInsert :: String -> TableName -> Position -> TableEnvironment -> TableContent
 evalInsert str tableName (Comma x y) environment
-  | y < length tableContent && x < length (tableContent !! y) = updatedTable
+  | y > 0 && y <= length tableContent && x > 0 && x <= length (tableContent !! (y-1)) = updatedTable
   | otherwise = error "evalInsert: position out of bounds"
   where
     T tableContent _ = lookupTable tableName environment
-    updatedRow = replaceAt x str (tableContent !! y)
-    updatedTable = replaceAt y updatedRow tableContent
+    updatedRow = replaceAt (x-1) str (tableContent !! (y-1))
+    updatedTable = replaceAt (y-1) updatedRow tableContent
 
 
 evalFill :: String -> TableName -> Axis -> TableEnvironment -> TableContent
 evalFill fillstr tableName axis environment = updated
   where
     T tableContent labels = lookupTable tableName environment
+    arity = if null tableContent then 0 else length (head tableContent)
     columnIndex = case axis of
                 ColumnInt n -> n 
                 ColumnAlpha label -> lookupLabel label labels
                 Row _ -> error "evalFill: Cannot fill based on row axis"
-    updated = map (replaceAt1 columnIndex fillstr "" ) tableContent
+    updated | columnIndex > 0 && columnIndex <= arity = map (replaceAt1 (columnIndex-1) fillstr "" ) tableContent
+            | otherwise = error "evalFill: column index out of bounds"
 
 
 replaceAt :: Int -> a -> [a] -> [a]
@@ -317,14 +322,14 @@ evalDelete :: TableName -> Axis -> TableEnvironment -> TableContent
 evalDelete tableName axis environment =
   case axis of
     Row i
-      | i < length tableContent -> deleteRow i tableContent
+      | i > 0 && i <= length tableContent -> deleteRow (i-1) tableContent
       | otherwise -> error "evalDelete: row index out of bounds"
     ColumnInt i
-      | i < arity -> deleteColumn i tableContent
+      | i > 0 && i <= arity -> deleteColumn (i-1) tableContent
       | otherwise -> error "evalDelete: column index out of bounds"
     ColumnAlpha label ->
       case lookupLabel label labels of
-        i | i < arity -> deleteColumn i tableContent
+        i | i > 0 && i <= arity -> deleteColumn (i-1) tableContent
           | otherwise -> error "evalDelete: column label index out of bounds"
   where
     T tableContent labels = lookupTable tableName environment
@@ -343,25 +348,25 @@ removeAt i xs
 
 evalClear :: TableName -> Position -> TableEnvironment -> TableContent
 evalClear tableName (Comma x y) environment
-  | y < length tableContent && x < length (tableContent !! y) = updatedTable
+  | y > 0 && y <= length tableContent && x > 0 && x <= length (tableContent !! (y-1)) = updatedTable
   | otherwise = error "evalClear: position out of bounds"
   where
     T tableContent _ = lookupTable tableName environment
-    updatedRow = replaceAt x "" (tableContent !! y)
-    updatedTable = replaceAt y updatedRow tableContent
+    updatedRow = replaceAt (x-1) "" (tableContent !! (y-1))
+    updatedTable = replaceAt (y-1) updatedRow tableContent
 
 
 evalAddBlank :: TableName -> Axis -> TableEnvironment -> TableContent
 evalAddBlank tableName axis environment = case axis of
   Row i
-    | i <= length tableContent -> insertAt i blankRow tableContent
+    | i <= (length tableContent + 1) && i > 0 -> insertAt (i-1) blankRow tableContent
     | otherwise -> error "evalAddBlank: row index out of bounds"
   ColumnInt i
-    | i <= arity -> map (insertAt i "") tableContent
+    | i <= (arity+1) && i > 0 -> map (insertAt (i-1) "") tableContent
     | otherwise -> error "evalAddBlank: column index out of bounds"
   ColumnAlpha label ->
     case lookupLabel label labels of
-      i | i <= arity -> map (insertAt i "") tableContent
+      i | i <= (arity+1) && i > 0 -> map (insertAt (i-1) "") tableContent
         | otherwise -> error "evalAddBlank: column label index out of bounds"
   where
     T tableContent labels = lookupTable tableName environment
@@ -395,7 +400,7 @@ lookupTable (TableRef key) environment = read stringTable
   where
     lookupOutput = lookup key environment
     stringTable = case lookupOutput of
-            Nothing -> error "Variable Error: The table with the name'" ++ key ++ "' could not be found."
+            Nothing -> error ("lookupTable: The table with the name'" ++ key ++ "' could not be found.")
             Just table -> show table
 
 --Finds the index of a column using the label of the column, given a list of associations between labels and indexes
@@ -405,7 +410,7 @@ lookupLabel key environment = read stringLabel
   where
     lookupOutput = lookup key environment
     stringLabel = case lookupOutput of
-            Nothing -> error "Variable Error: The table with the name'" ++ key ++ "' could not be found."
+            Nothing -> error ("lookupLabel: The table with the name'" ++ key ++ "' could not be found.")
             Just label -> show label
 
 getLabelIndex :: ColumnReference -> TableEnvironment -> Int
