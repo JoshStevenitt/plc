@@ -54,14 +54,15 @@ tokens :-
   AND                             { \p s -> PT p TokenAND }
   OR                              { \p s -> PT p TokenOR }
   NOT                             { \p s -> PT p TokenNOT }
+  EQ                              { \p s -> PT p TokenEQ }
   MAX                             { \p s -> PT p TokenMAX}
   DISTINCT                        { \p s -> PT p TokenDISTINCT}
   PLUS                            { \p s -> PT p TokenPLUSWORD}
   \=                              { \p s -> PT p TokenEQUAL }
+  "=="                            { \p s -> PT p TokenEQUIVALENT }
   INDEX                           { \p s -> PT p TokenINDEX }
   \+                              { \p s -> PT p TokenPLUS }
   \*                              { \p s -> PT p TokenMULTIPLY }
-  \/                              { \p s -> PT p TokenDIVSINGLE }
   "//"                            { \p s -> PT p TokenDIVTWO }
   \%                              { \p s -> PT p TokenPERCENT }
   \^                              { \p s -> PT p TokenEXP }
@@ -129,11 +130,12 @@ data Token =
   | TokenAND
   | TokenOR
   | TokenNOT
+  | TokenEQ
+  | TokenEQUIVALENT
   | TokenEQUAL
   | TokenINDEX
   | TokenPLUS
   | TokenMULTIPLY
-  | TokenDIVSINGLE
   | TokenDIVTWO
   | TokenPERCENT
   | TokenEXP

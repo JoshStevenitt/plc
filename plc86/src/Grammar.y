@@ -44,6 +44,7 @@ import Lexer
   AND                   { PT _ TokenAND }
   OR                    { PT _ TokenOR }
   NOT                   { PT _ TokenNOT }
+  EQ                    { PT _ TokenEQ }
   INDEX                 { PT _ TokenINDEX }
   MAX                   { PT _ TokenMAX }
   PLUS                  { PT _ TokenPLUSWORD}
@@ -52,10 +53,10 @@ import Lexer
   DESC                  { PT _ TokenDESC }
   ADDBLANKTO            { PT _ TokenADDBLANKTO }
   '='                   { PT _ TokenEQUAL }
+  "=="                  { PT _ TokenEQUIVALENT}
   '+'                   { PT _ TokenPLUS }
   '*'                   { PT _ TokenMULTIPLY }
-  '/'                   { PT _ TokenDIVSINGLE }
-  "//"                  { PT _ TokenDIVTWO }
+  '//'                  { PT _ TokenDIVTWO }
   '%'                   { PT _ TokenPERCENT }
   '^'                   { PT _ TokenEXP }
   '{'                   { PT _ TokenSquigleBracketL }
@@ -84,11 +85,13 @@ import Lexer
 
 -- Comparison
 %nonassoc '='
+%nonassoc "=="
 
 -- Boolean (lower precedence)
 %nonassoc NOT
 %right AND
 %right OR
+%right EQ
 
 -- Unary minus (lowest, disambiguated manually)
 %nonassoc NEG
@@ -181,12 +184,12 @@ BooleanExpression : '(' BooleanExpression ')'           { BooleanBracket $2 }
         | BooleanExpression AND BooleanExpression %prec AND { BooleanAND $1 $3 }
         | BooleanExpression OR BooleanExpression %prec OR { BooleanOR $1 $3 }
         | NOT BooleanExpression %prec NOT               { BooleanNOT $2 }
+        | BooleanExpression EQ BooleanExpression %prec EQ { BooleanEQ $1 $3 }
         | SubExpression '=' SubExpression  %prec '='    { BooleanSubExpression $1 $3 }
+        | IndexExpression "==" IndexExpression %prec "==" { BooleanIndexExpression $1 $3 }
 
-SubExpression : BooleanExpression                       { SubBoolean $1 }
-        | ColumnReference                               { SubColumn $1 }
+SubExpression : ColumnReference                         { SubColumn $1 }
         | var                                           { SubString $1 }
-        | IndexExpression %prec NEG                     { SubIndex $1 }
 
 IndexExpression : INDEX                                 { IndexSingular }
         | Number                                        { IndexNum $1}
@@ -194,9 +197,8 @@ IndexExpression : INDEX                                 { IndexSingular }
         | IndexExpression '+' IndexExpression           { IndexPlus $1 $3 }
         | IndexExpression '-' IndexExpression           { IndexMinus $1 $3 } 
         | IndexExpression '*' IndexExpression           { IndexMult $1 $3 } 
-        | IndexExpression '/' IndexExpression           { IndexSingularDiv $1 $3 } 
-        | IndexExpression "//" IndexExpression          { IndexTwoDiv $1 $3 } 
-        | IndexExpression '%' IndexExpression           { IndexPercent $1 $3 } 
+        | IndexExpression '//' IndexExpression          { IndexIntDiv $1 $3 } 
+        | IndexExpression '%' IndexExpression           { IndexMod $1 $3 } 
         | IndexExpression '^' IndexExpression           { IndexExpo $1 $3 }
 
 Number : positiveNum                                    { PositiveNumber $1}
@@ -221,7 +223,7 @@ data TableAssignment = NoLabels TableName
                 | WithLabels TableName ColumnLabels
                 deriving Show
 
-data TableName = TableRef String deriving Show
+data TableName = TableRef String deriving (Eq, Show)
 
 --data Tables = TablesMultiple TableName Tables 
 --                | TableSingular TableName
@@ -311,13 +313,13 @@ data BooleanExpression = BooleanBracket BooleanExpression
                 | BooleanAND BooleanExpression BooleanExpression
                 | BooleanOR BooleanExpression BooleanExpression
                 | BooleanNOT BooleanExpression
+                | BooleanEQ BooleanExpression BooleanExpression
                 | BooleanSubExpression SubExpression SubExpression
+                | BooleanIndexExpression IndexExpression IndexExpression
                 deriving Show
 
-data SubExpression = SubBoolean BooleanExpression
-                | SubColumn ColumnReference
+data SubExpression = SubColumn ColumnReference
                 | SubString String
-                | SubIndex IndexExpression
                 deriving Show
 
 data IndexExpression = IndexSingular
@@ -326,9 +328,8 @@ data IndexExpression = IndexSingular
                 | IndexPlus IndexExpression IndexExpression
                 | IndexMinus IndexExpression IndexExpression
                 | IndexMult IndexExpression IndexExpression
-                | IndexSingularDiv IndexExpression IndexExpression
-                | IndexTwoDiv IndexExpression IndexExpression
-                | IndexPercent IndexExpression IndexExpression
+                | IndexIntDiv IndexExpression IndexExpression
+                | IndexMod IndexExpression IndexExpression
                 | IndexExpo IndexExpression IndexExpression
                 deriving Show
 
