@@ -70,6 +70,7 @@ evalInputSingle (Input filename tableAssignment) = do
 makeTableVariable :: TableAssignment -> TableContent -> TableVariable
 makeTableVariable tableAssignment tableContent = (tableName, read tableString)
   where
+    strippedTableContent = [[strip item | item <- row] | row <- tableContent]
     (tableName,labels) = case tableAssignment of
                             NoLabels (TableRef name) -> (name, [])
                             WithLabels (TableRef name) (LabelConstructor columnLabels) -> (name, evalColumnLabels columnLabels)
@@ -77,7 +78,9 @@ makeTableVariable tableAssignment tableContent = (tableName, read tableString)
                 = error "The number of columns in the table '" ++ tableName ++ "' are not the same for all rows."
           | (not $ null labels) && (not (length (head tableContent) == length labels))
                 = error "The number of labels does not match the number of columns for table '" ++ tableName ++ "'"
-          | otherwise = show (T tableContent labels)
+          | nub labels /= labels
+                = error "There are multiple labels with the same name in the table, this is not allowed."
+          | otherwise = show (T strippedTableContent labels)
 
 --Returns the tablename given by a table variable
 tableAssignmentToTableName :: TableAssignment -> TableName
@@ -143,9 +146,9 @@ evalSelect selection tableEnvironment = finalTable
   where
     Selecter maxClause distinct columnChoice tableExpression whereClause plusClause = selection
     (tableAfterFromClause, fromTableEnvironment) = (evalTableExpression tableExpression tableEnvironment)
-    (tableAfterColumnChoice, columnTableEnvironment) = evalColumnChoice columnChoice tableAfterFromClause fromTableEnvironment
-    (tableAfterWhereClause, whereTableEnvironment) = evalWhereClause whereClause tableAfterColumnChoice columnTableEnvironment
-    T whereClauseTableContent _ = lookupTable tableAfterWhereClause whereTableEnvironment
+    (tableAfterWhereClause, whereTableEnvironment) = evalWhereClause whereClause tableAfterFromClause fromTableEnvironment
+    (tableAfterColumnChoice, columnTableEnvironment) = evalColumnChoice columnChoice tableAfterWhereClause whereTableEnvironment
+    T whereClauseTableContent _ = lookupTable tableAfterColumnChoice columnTableEnvironment
     tableAfterDistinctClause = evalDistinctClause distinct whereClauseTableContent
     tableAfterMaxClause = evalMaxClause maxClause tableAfterDistinctClause
     finalTable = case plusClause of
@@ -166,14 +169,6 @@ evalTableExpression tableExpression tableEnvironment = case tableExpression of
                                                               newTableEnvironment = updateTableEnvironment newTable tableEnvironment
                                                           SingleTableExpression singleTableExpression -> evalTableExpression singleTableExpression tableEnvironment
 
-evalColumnChoice :: ColumnChoice -> TableName -> TableEnvironment -> (TableName, TableEnvironment)
-evalColumnChoice ColumnALL tableName tableEnvironment = (tableName, tableEnvironment)
-evalColumnChoice columnChoice tableName tableEnvironment = (tableName, newTableEnvironment)
-  where
-    T tableContent _ = lookupTable tableName tableEnvironment
-    newTableContent = undefined
-    newTable = T newTableContent 
-
 
 evalWhereClause :: WhereClause -> TableName -> TableEnvironment -> (TableName, TableEnvironment)
 evalWhereClause (WhereTrue booleanExpression) tableName tableEnvironment = (tableName, newTableEnvironment)
@@ -181,15 +176,68 @@ evalWhereClause (WhereTrue booleanExpression) tableName tableEnvironment = (tabl
     TableRef name = tableName
     T tableContent tableLabels = lookupTable tableName tableEnvironment
     newTableContent = [ row | row <- tableContent,
-                          matchRowToExpression row booleanExpression tableName tableEnvironment]
+                          matchRowToExpression row 0 booleanExpression tableName tableEnvironment]
     newTable = T newTableContent tableLabels
     newTableEnvironment = updateTableEnvironment (name, newTable) tableEnvironment
     
 evalWhereClause WhereFalse tableName tableEnvironment = (tableName, tableEnvironment)
 
-matchRowToExpression :: [String] -> BooleanExpression -> TableName -> TableEnvironment -> Bool
-matchRowToExpression row booleanExpression tableName tableEnvironment = undefined
+matchRowToExpression :: [String] -> Int -> BooleanExpression -> TableName -> TableEnvironment -> Bool
+matchRowToExpression row rowIndex booleanExpression tableName tableEnvironment = matchRToBoolHelp booleanExpression
+  where
+    matchRToBoolHelp :: BooleanExpression -> Bool
+    matchRToBoolHelp (BooleanBracket expression) = matchRToBoolHelp expression 
+    matchRToBoolHelp (BooleanAND expression1 expression2)
+       = (matchRToBoolHelp expression1) && (matchRToBoolHelp expression2)
+    matchRToBoolHelp (BooleanOR expression1 expression2)
+       = (matchRToBoolHelp expression1 ) || (matchRToBoolHelp expression2)
+    matchRToBoolHelp (BooleanNOT expression)  = not (matchRToBoolHelp expression)
+    matchRToBoolHelp (BooleanEQ expression1 expression2)
+       = (matchRToBoolHelp expression1) == (matchRToBoolHelp expression2)
+    matchRToBoolHelp (BooleanSubExpression se1 se2) 
+       = matchRToSubHelp se1 == matchRToSubHelp se2
+    matchRToBoolHelp (BooleanIndexExpression ie1 ie2)
+       = matchRToIndexHelp ie1 == matchRToIndexHelp ie2
+    
+    
+    matchRToSubHelp (SubString string) = string
+    matchRToSubHelp (SubColumn colRef) | tableName /= refTableName = error "The table you are referencing in the where clause is not the same as the one produced in the from clause."
+                                       | otherwise = row!!(getLabelIndex colRef tableEnvironment -1)
+      where
+      refTableName = case colRef of 
+                      AlphaColumn tn _ -> tn
+                      IntegerColumn tn _ -> tn
 
+
+    matchRToIndexHelp :: IndexExpression -> Int
+    matchRToIndexHelp IndexSingular = rowIndex
+    matchRToIndexHelp (IndexNum number) = case number of
+                                            PositiveNumber num -> read num
+                                            NegativeNumber num -> read num
+    matchRToIndexHelp (IndexBracket ie) = matchRToIndexHelp ie
+    matchRToIndexHelp (IndexPlus ie1 ie2) = matchRToIndexHelp ie1 + matchRToIndexHelp ie2
+    matchRToIndexHelp (IndexMinus ie1 ie2) = matchRToIndexHelp ie1 - matchRToIndexHelp ie2
+    matchRToIndexHelp (IndexMult ie1 ie2) = matchRToIndexHelp ie1 * matchRToIndexHelp ie2
+    matchRToIndexHelp (IndexIntDiv ie1 ie2) = matchRToIndexHelp ie1 `div` matchRToIndexHelp ie2
+      --Getting the remainder of a fractional division, similar to mod
+    matchRToIndexHelp (IndexMod ie1 ie2) = matchRToIndexHelp ie1 `mod` matchRToIndexHelp ie2
+    matchRToIndexHelp (IndexExpo ie1 ie2) = matchRToIndexHelp ie1 ^ matchRToIndexHelp ie2
+     
+
+
+
+evalColumnChoice :: ColumnChoice -> TableName -> TableEnvironment -> (TableName, TableEnvironment)
+evalColumnChoice ColumnALL tableName tableEnvironment = (tableName, tableEnvironment)
+evalColumnChoice columnChoice tableName tableEnvironment = (tableName, newTableEnvironment)
+  where
+    TableRef name = tableName
+    newTableContent = columnChoiceHelp columnChoice []
+    newTable = T newTableContent []
+    newTableEnvironment = updateTableEnvironment (name, newTable) tableEnvironment
+    
+    columnChoiceHelp (ColumnSingle colRef) x = transpose (reverse (getColumn colRef tableEnvironment:x))
+    columnChoiceHelp (ColumnMultiple colRef remainingColumnChoice) x = columnChoiceHelp remainingColumnChoice (getColumn colRef tableEnvironment:x)
+ 
 
 
 evalDistinctClause :: Distinct -> TableContent -> TableContent
@@ -360,6 +408,16 @@ lookupLabel key environment = read stringLabel
             Nothing -> error "Variable Error: The table with the name'" ++ key ++ "' could not be found."
             Just label -> show label
 
+getLabelIndex :: ColumnReference -> TableEnvironment -> Int
+getLabelIndex colRef tableEnvironment = index
+  where
+    (tableName, column, refIsLabel) = case  colRef of
+                                  AlphaColumn name string -> (name, string, True)
+                                  IntegerColumn name number -> (name, show number, False)
+    T _ labels = lookupTable tableName tableEnvironment
+    index | refIsLabel = lookupLabel column labels
+          | otherwise = read column
+
 --Returns all columns of a given table given a column and a TableEnvironment
 getColumn :: ColumnReference -> TableEnvironment -> ColumnData
 getColumn reference environment = dataInColumn
@@ -372,4 +430,4 @@ getColumn reference environment = dataInColumn
           | otherwise = read column
 
     dataInColumn = [value | row <- tableContent,
-                      let value = row!!index]
+                      let value = row!!(index-1)]
