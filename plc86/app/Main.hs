@@ -35,6 +35,8 @@ main = do
             let tokens = alexScanTokens content
             let tree = parseCalc tokens
             eval tree
+        [] -> do
+              putStr "Argument error: please give the name of the program file you want to run"
 
 --The main evaluation function. 
 --This function calls smaller evaluation functions to perform the following tasks:
