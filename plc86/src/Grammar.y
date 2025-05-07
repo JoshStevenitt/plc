@@ -34,7 +34,6 @@ import Lexer
   LEFT                  { PT _ TokenLEFT }
   RIGHT                 { PT _ TokenRIGHT }
   FULL                  { PT _ TokenFULL }
-  OUTER                 { PT _ TokenOUTER }
   TABLE                 { PT _ TokenTABLE }
   AS                    { PT _ TokenAS }
   WITHLABELS            { PT _ TokenWITHLABELS }
@@ -178,7 +177,6 @@ JoinOperator : INNER JOIN                               { JoinInner }
         | LEFT JOIN                                     { JoinLeft }
         | RIGHT JOIN                                    { JoinRight }
         | FULL JOIN                                     { JoinFull }
-        | OUTER JOIN                                    { JoinOuter }
 
 BooleanExpression : '(' BooleanExpression ')'           { BooleanBracket $2 }
         | BooleanExpression AND BooleanExpression %prec AND { BooleanAND $1 $3 }
@@ -306,7 +304,6 @@ data JoinOperator = JoinInner
                 | JoinLeft
                 | JoinRight
                 | JoinFull
-                | JoinOuter
                 deriving Show
 
 data BooleanExpression = BooleanBracket BooleanExpression

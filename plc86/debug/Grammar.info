@@ -74,27 +74,26 @@ Grammar
 	JoinOperator -> LEFT JOIN                          (51)
 	JoinOperator -> RIGHT JOIN                         (52)
 	JoinOperator -> FULL JOIN                          (53)
-	JoinOperator -> OUTER JOIN                         (54)
-	BooleanExpression -> '(' BooleanExpression ')'     (55)
-	BooleanExpression -> BooleanExpression AND BooleanExpression   (56)
-	BooleanExpression -> BooleanExpression OR BooleanExpression   (57)
-	BooleanExpression -> NOT BooleanExpression         (58)
-	BooleanExpression -> BooleanExpression EQ BooleanExpression   (59)
-	BooleanExpression -> SubExpression '=' SubExpression   (60)
-	BooleanExpression -> IndexExpression "==" IndexExpression   (61)
-	SubExpression -> ColumnReference                   (62)
-	SubExpression -> var                               (63)
-	IndexExpression -> INDEX                           (64)
-	IndexExpression -> Number                          (65)
-	IndexExpression -> '(' IndexExpression ')'         (66)
-	IndexExpression -> IndexExpression '+' IndexExpression   (67)
-	IndexExpression -> IndexExpression '-' IndexExpression   (68)
-	IndexExpression -> IndexExpression '*' IndexExpression   (69)
-	IndexExpression -> IndexExpression '//' IndexExpression   (70)
-	IndexExpression -> IndexExpression '%' IndexExpression   (71)
-	IndexExpression -> IndexExpression '^' IndexExpression   (72)
-	Number -> positiveNum                              (73)
-	Number -> negativeNum                              (74)
+	BooleanExpression -> '(' BooleanExpression ')'     (54)
+	BooleanExpression -> BooleanExpression AND BooleanExpression   (55)
+	BooleanExpression -> BooleanExpression OR BooleanExpression   (56)
+	BooleanExpression -> NOT BooleanExpression         (57)
+	BooleanExpression -> BooleanExpression EQ BooleanExpression   (58)
+	BooleanExpression -> SubExpression '=' SubExpression   (59)
+	BooleanExpression -> IndexExpression "==" IndexExpression   (60)
+	SubExpression -> ColumnReference                   (61)
+	SubExpression -> var                               (62)
+	IndexExpression -> INDEX                           (63)
+	IndexExpression -> Number                          (64)
+	IndexExpression -> '(' IndexExpression ')'         (65)
+	IndexExpression -> IndexExpression '+' IndexExpression   (66)
+	IndexExpression -> IndexExpression '-' IndexExpression   (67)
+	IndexExpression -> IndexExpression '*' IndexExpression   (68)
+	IndexExpression -> IndexExpression '//' IndexExpression   (69)
+	IndexExpression -> IndexExpression '%' IndexExpression   (70)
+	IndexExpression -> IndexExpression '^' IndexExpression   (71)
+	Number -> positiveNum                              (72)
+	Number -> negativeNum                              (73)
 
 -----------------------------------------------------------------------------
 Terminals
@@ -125,7 +124,6 @@ Terminals
 	LEFT           { PT _ TokenLEFT }
 	RIGHT          { PT _ TokenRIGHT }
 	FULL           { PT _ TokenFULL }
-	OUTER          { PT _ TokenOUTER }
 	TABLE          { PT _ TokenTABLE }
 	AS             { PT _ TokenAS }
 	WITHLABELS     { PT _ TokenWITHLABELS }
@@ -196,11 +194,11 @@ Non-terminals
 	WhereClause     rules 45, 46
 	PlusClause      rules 47, 48
 	JoinClause      rule  49
-	JoinOperator    rules 50, 51, 52, 53, 54
-	BooleanExpression rules 55, 56, 57, 58, 59, 60, 61
-	SubExpression   rules 62, 63
-	IndexExpression rules 64, 65, 66, 67, 68, 69, 70, 71, 72
-	Number          rules 73, 74
+	JoinOperator    rules 50, 51, 52, 53
+	BooleanExpression rules 54, 55, 56, 57, 58, 59, 60
+	SubExpression   rules 61, 62
+	IndexExpression rules 63, 64, 65, 66, 67, 68, 69, 70, 71
+	Number          rules 72, 73
 
 -----------------------------------------------------------------------------
 States
@@ -358,7 +356,6 @@ State 18
 	LEFT           reduce using rule 7
 	RIGHT          reduce using rule 7
 	FULL           reduce using rule 7
-	OUTER          reduce using rule 7
 	WITHLABELS     reduce using rule 7
 	NOLABELS       reduce using rule 7
 	WHERE          reduce using rule 7
@@ -452,7 +449,6 @@ State 27
 	LEFT           reduce using rule 27
 	RIGHT          reduce using rule 27
 	FULL           reduce using rule 27
-	OUTER          reduce using rule 27
 	WHERE          reduce using rule 27
 	WITHCONSTRAINT reduce using rule 27
 	PLUS           reduce using rule 27
@@ -716,7 +712,34 @@ State 58
 
 State 59
 
-	Number -> positiveNum .                             (rule 73)
+	Number -> positiveNum .                             (rule 72)
+
+	COLUMN         reduce using rule 72
+	COLUMNS        reduce using rule 72
+	INNER          reduce using rule 72
+	LEFT           reduce using rule 72
+	RIGHT          reduce using rule 72
+	FULL           reduce using rule 72
+	WHERE          reduce using rule 72
+	WITHCONSTRAINT reduce using rule 72
+	AND            reduce using rule 72
+	OR             reduce using rule 72
+	EQ             reduce using rule 72
+	PLUS           reduce using rule 72
+	DISTINCT       reduce using rule 72
+	"=="           reduce using rule 72
+	'+'            reduce using rule 72
+	'*'            reduce using rule 72
+	'//'           reduce using rule 72
+	'%'            reduce using rule 72
+	'^'            reduce using rule 72
+	'-'            reduce using rule 72
+	')'            reduce using rule 72
+
+
+State 60
+
+	Number -> negativeNum .                             (rule 73)
 
 	COLUMN         reduce using rule 73
 	COLUMNS        reduce using rule 73
@@ -724,7 +747,6 @@ State 59
 	LEFT           reduce using rule 73
 	RIGHT          reduce using rule 73
 	FULL           reduce using rule 73
-	OUTER          reduce using rule 73
 	WHERE          reduce using rule 73
 	WITHCONSTRAINT reduce using rule 73
 	AND            reduce using rule 73
@@ -740,34 +762,6 @@ State 59
 	'^'            reduce using rule 73
 	'-'            reduce using rule 73
 	')'            reduce using rule 73
-
-
-State 60
-
-	Number -> negativeNum .                             (rule 74)
-
-	COLUMN         reduce using rule 74
-	COLUMNS        reduce using rule 74
-	INNER          reduce using rule 74
-	LEFT           reduce using rule 74
-	RIGHT          reduce using rule 74
-	FULL           reduce using rule 74
-	OUTER          reduce using rule 74
-	WHERE          reduce using rule 74
-	WITHCONSTRAINT reduce using rule 74
-	AND            reduce using rule 74
-	OR             reduce using rule 74
-	EQ             reduce using rule 74
-	PLUS           reduce using rule 74
-	DISTINCT       reduce using rule 74
-	"=="           reduce using rule 74
-	'+'            reduce using rule 74
-	'*'            reduce using rule 74
-	'//'           reduce using rule 74
-	'%'            reduce using rule 74
-	'^'            reduce using rule 74
-	'-'            reduce using rule 74
-	')'            reduce using rule 74
 
 
 State 61
@@ -795,7 +789,6 @@ State 63
 	LEFT           reduce using rule 28
 	RIGHT          reduce using rule 28
 	FULL           reduce using rule 28
-	OUTER          reduce using rule 28
 	WHERE          reduce using rule 28
 	WITHCONSTRAINT reduce using rule 28
 	PLUS           reduce using rule 28
@@ -811,7 +804,6 @@ State 64
 	LEFT           reduce using rule 29
 	RIGHT          reduce using rule 29
 	FULL           reduce using rule 29
-	OUTER          reduce using rule 29
 	WHERE          reduce using rule 29
 	WITHCONSTRAINT reduce using rule 29
 	PLUS           reduce using rule 29
@@ -827,7 +819,6 @@ State 65
 	LEFT           reduce using rule 36
 	RIGHT          reduce using rule 36
 	FULL           reduce using rule 36
-	OUTER          reduce using rule 36
 	WHERE          reduce using rule 36
 	WITHCONSTRAINT reduce using rule 36
 	PLUS           reduce using rule 36
@@ -843,7 +834,6 @@ State 66
 	LEFT           reduce using rule 37
 	RIGHT          reduce using rule 37
 	FULL           reduce using rule 37
-	OUTER          reduce using rule 37
 	WHERE          reduce using rule 37
 	WITHCONSTRAINT reduce using rule 37
 	PLUS           reduce using rule 37
@@ -876,7 +866,6 @@ State 69
 	LEFT           reduce using rule 32
 	RIGHT          reduce using rule 32
 	FULL           reduce using rule 32
-	OUTER          reduce using rule 32
 	WHERE          reduce using rule 32
 	WITHCONSTRAINT reduce using rule 32
 	PLUS           reduce using rule 32
@@ -908,7 +897,6 @@ State 72
 	LEFT           reduce using rule 33
 	RIGHT          reduce using rule 33
 	FULL           reduce using rule 33
-	OUTER          reduce using rule 33
 	WHERE          reduce using rule 33
 	WITHCONSTRAINT reduce using rule 33
 	PLUS           reduce using rule 33
@@ -931,7 +919,6 @@ State 74
 	LEFT           reduce using rule 34
 	RIGHT          reduce using rule 34
 	FULL           reduce using rule 34
-	OUTER          reduce using rule 34
 	WHERE          reduce using rule 34
 	WITHCONSTRAINT reduce using rule 34
 	PLUS           reduce using rule 34
@@ -985,7 +972,6 @@ State 80
 	LEFT           reduce using rule 19
 	RIGHT          reduce using rule 19
 	FULL           reduce using rule 19
-	OUTER          reduce using rule 19
 	WHERE          reduce using rule 19
 	WITHCONSTRAINT reduce using rule 19
 	PLUS           reduce using rule 19
@@ -1001,7 +987,6 @@ State 81
 	LEFT           reduce using rule 17
 	RIGHT          reduce using rule 17
 	FULL           reduce using rule 17
-	OUTER          reduce using rule 17
 	WHERE          reduce using rule 17
 	WITHCONSTRAINT reduce using rule 17
 	PLUS           reduce using rule 17
@@ -1017,7 +1002,6 @@ State 82
 	LEFT           reduce using rule 18
 	RIGHT          reduce using rule 18
 	FULL           reduce using rule 18
-	OUTER          reduce using rule 18
 	WHERE          reduce using rule 18
 	WITHCONSTRAINT reduce using rule 18
 	PLUS           reduce using rule 18
@@ -1033,7 +1017,6 @@ State 83
 	LEFT           reduce using rule 31
 	RIGHT          reduce using rule 31
 	FULL           reduce using rule 31
-	OUTER          reduce using rule 31
 	WHERE          reduce using rule 31
 	WITHCONSTRAINT reduce using rule 31
 	PLUS           reduce using rule 31
@@ -1049,7 +1032,6 @@ State 84
 	LEFT           reduce using rule 30
 	RIGHT          reduce using rule 30
 	FULL           reduce using rule 30
-	OUTER          reduce using rule 30
 	WHERE          reduce using rule 30
 	WITHCONSTRAINT reduce using rule 30
 	PLUS           reduce using rule 30
@@ -1110,36 +1092,34 @@ State 89
 
 State 90
 
-	SubExpression -> ColumnReference .                  (rule 62)
+	SubExpression -> ColumnReference .                  (rule 61)
 
-	INNER          reduce using rule 62
-	LEFT           reduce using rule 62
-	RIGHT          reduce using rule 62
-	FULL           reduce using rule 62
-	OUTER          reduce using rule 62
-	WHERE          reduce using rule 62
-	WITHCONSTRAINT reduce using rule 62
-	AND            reduce using rule 62
-	OR             reduce using rule 62
-	EQ             reduce using rule 62
-	PLUS           reduce using rule 62
-	'='            reduce using rule 62
-	'-'            reduce using rule 62
-	')'            reduce using rule 62
+	INNER          reduce using rule 61
+	LEFT           reduce using rule 61
+	RIGHT          reduce using rule 61
+	FULL           reduce using rule 61
+	WHERE          reduce using rule 61
+	WITHCONSTRAINT reduce using rule 61
+	AND            reduce using rule 61
+	OR             reduce using rule 61
+	EQ             reduce using rule 61
+	PLUS           reduce using rule 61
+	'='            reduce using rule 61
+	'-'            reduce using rule 61
+	')'            reduce using rule 61
 
 
 State 91
 
 	Query -> MERGE TableName TableName WITHCONSTRAINT BooleanExpression .    (rule 26)
-	BooleanExpression -> BooleanExpression . AND BooleanExpression    (rule 56)
-	BooleanExpression -> BooleanExpression . OR BooleanExpression    (rule 57)
-	BooleanExpression -> BooleanExpression . EQ BooleanExpression    (rule 59)
+	BooleanExpression -> BooleanExpression . AND BooleanExpression    (rule 55)
+	BooleanExpression -> BooleanExpression . OR BooleanExpression    (rule 56)
+	BooleanExpression -> BooleanExpression . EQ BooleanExpression    (rule 58)
 
 	INNER          reduce using rule 26
 	LEFT           reduce using rule 26
 	RIGHT          reduce using rule 26
 	FULL           reduce using rule 26
-	OUTER          reduce using rule 26
 	WHERE          reduce using rule 26
 	WITHCONSTRAINT reduce using rule 26
 	AND            shift, and enter state 119
@@ -1152,20 +1132,20 @@ State 91
 
 State 92
 
-	BooleanExpression -> SubExpression . '=' SubExpression    (rule 60)
+	BooleanExpression -> SubExpression . '=' SubExpression    (rule 59)
 
 	'='            shift, and enter state 118
 
 
 State 93
 
-	BooleanExpression -> IndexExpression . "==" IndexExpression    (rule 61)
-	IndexExpression -> IndexExpression . '+' IndexExpression    (rule 67)
-	IndexExpression -> IndexExpression . '-' IndexExpression    (rule 68)
-	IndexExpression -> IndexExpression . '*' IndexExpression    (rule 69)
-	IndexExpression -> IndexExpression . '//' IndexExpression    (rule 70)
-	IndexExpression -> IndexExpression . '%' IndexExpression    (rule 71)
-	IndexExpression -> IndexExpression . '^' IndexExpression    (rule 72)
+	BooleanExpression -> IndexExpression . "==" IndexExpression    (rule 60)
+	IndexExpression -> IndexExpression . '+' IndexExpression    (rule 66)
+	IndexExpression -> IndexExpression . '-' IndexExpression    (rule 67)
+	IndexExpression -> IndexExpression . '*' IndexExpression    (rule 68)
+	IndexExpression -> IndexExpression . '//' IndexExpression    (rule 69)
+	IndexExpression -> IndexExpression . '%' IndexExpression    (rule 70)
+	IndexExpression -> IndexExpression . '^' IndexExpression    (rule 71)
 
 	"=="           shift, and enter state 111
 	'+'            shift, and enter state 112
@@ -1178,32 +1158,31 @@ State 93
 
 State 94
 
-	IndexExpression -> Number .                         (rule 65)
+	IndexExpression -> Number .                         (rule 64)
 
-	INNER          reduce using rule 65
-	LEFT           reduce using rule 65
-	RIGHT          reduce using rule 65
-	FULL           reduce using rule 65
-	OUTER          reduce using rule 65
-	WHERE          reduce using rule 65
-	WITHCONSTRAINT reduce using rule 65
-	AND            reduce using rule 65
-	OR             reduce using rule 65
-	EQ             reduce using rule 65
-	PLUS           reduce using rule 65
-	"=="           reduce using rule 65
-	'+'            reduce using rule 65
-	'*'            reduce using rule 65
-	'//'           reduce using rule 65
-	'%'            reduce using rule 65
-	'^'            reduce using rule 65
-	'-'            reduce using rule 65
-	')'            reduce using rule 65
+	INNER          reduce using rule 64
+	LEFT           reduce using rule 64
+	RIGHT          reduce using rule 64
+	FULL           reduce using rule 64
+	WHERE          reduce using rule 64
+	WITHCONSTRAINT reduce using rule 64
+	AND            reduce using rule 64
+	OR             reduce using rule 64
+	EQ             reduce using rule 64
+	PLUS           reduce using rule 64
+	"=="           reduce using rule 64
+	'+'            reduce using rule 64
+	'*'            reduce using rule 64
+	'//'           reduce using rule 64
+	'%'            reduce using rule 64
+	'^'            reduce using rule 64
+	'-'            reduce using rule 64
+	')'            reduce using rule 64
 
 
 State 95
 
-	BooleanExpression -> NOT . BooleanExpression        (rule 58)
+	BooleanExpression -> NOT . BooleanExpression        (rule 57)
 
 	NOT            shift, and enter state 95
 	INDEX          shift, and enter state 96
@@ -1222,33 +1201,32 @@ State 95
 
 State 96
 
-	IndexExpression -> INDEX .                          (rule 64)
+	IndexExpression -> INDEX .                          (rule 63)
 
-	INNER          reduce using rule 64
-	LEFT           reduce using rule 64
-	RIGHT          reduce using rule 64
-	FULL           reduce using rule 64
-	OUTER          reduce using rule 64
-	WHERE          reduce using rule 64
-	WITHCONSTRAINT reduce using rule 64
-	AND            reduce using rule 64
-	OR             reduce using rule 64
-	EQ             reduce using rule 64
-	PLUS           reduce using rule 64
-	"=="           reduce using rule 64
-	'+'            reduce using rule 64
-	'*'            reduce using rule 64
-	'//'           reduce using rule 64
-	'%'            reduce using rule 64
-	'^'            reduce using rule 64
-	'-'            reduce using rule 64
-	')'            reduce using rule 64
+	INNER          reduce using rule 63
+	LEFT           reduce using rule 63
+	RIGHT          reduce using rule 63
+	FULL           reduce using rule 63
+	WHERE          reduce using rule 63
+	WITHCONSTRAINT reduce using rule 63
+	AND            reduce using rule 63
+	OR             reduce using rule 63
+	EQ             reduce using rule 63
+	PLUS           reduce using rule 63
+	"=="           reduce using rule 63
+	'+'            reduce using rule 63
+	'*'            reduce using rule 63
+	'//'           reduce using rule 63
+	'%'            reduce using rule 63
+	'^'            reduce using rule 63
+	'-'            reduce using rule 63
+	')'            reduce using rule 63
 
 
 State 97
 
-	BooleanExpression -> '(' . BooleanExpression ')'    (rule 55)
-	IndexExpression -> '(' . IndexExpression ')'        (rule 66)
+	BooleanExpression -> '(' . BooleanExpression ')'    (rule 54)
+	IndexExpression -> '(' . IndexExpression ')'        (rule 65)
 
 	NOT            shift, and enter state 95
 	INDEX          shift, and enter state 96
@@ -1267,22 +1245,21 @@ State 97
 
 State 98
 
-	SubExpression -> var .                              (rule 63)
+	SubExpression -> var .                              (rule 62)
 
-	INNER          reduce using rule 63
-	LEFT           reduce using rule 63
-	RIGHT          reduce using rule 63
-	FULL           reduce using rule 63
-	OUTER          reduce using rule 63
-	WHERE          reduce using rule 63
-	WITHCONSTRAINT reduce using rule 63
-	AND            reduce using rule 63
-	OR             reduce using rule 63
-	EQ             reduce using rule 63
-	PLUS           reduce using rule 63
-	'='            reduce using rule 63
-	'-'            reduce using rule 63
-	')'            reduce using rule 63
+	INNER          reduce using rule 62
+	LEFT           reduce using rule 62
+	RIGHT          reduce using rule 62
+	FULL           reduce using rule 62
+	WHERE          reduce using rule 62
+	WITHCONSTRAINT reduce using rule 62
+	AND            reduce using rule 62
+	OR             reduce using rule 62
+	EQ             reduce using rule 62
+	PLUS           reduce using rule 62
+	'='            reduce using rule 62
+	'-'            reduce using rule 62
+	')'            reduce using rule 62
 
 
 State 99
@@ -1320,7 +1297,6 @@ State 102
 	LEFT           reduce using rule 16
 	RIGHT          reduce using rule 16
 	FULL           reduce using rule 16
-	OUTER          reduce using rule 16
 	WHERE          reduce using rule 16
 	WITHCONSTRAINT reduce using rule 16
 	PLUS           reduce using rule 16
@@ -1336,7 +1312,6 @@ State 103
 	LEFT           reduce using rule 22
 	RIGHT          reduce using rule 22
 	FULL           reduce using rule 22
-	OUTER          reduce using rule 22
 	WHERE          reduce using rule 22
 	WITHCONSTRAINT reduce using rule 22
 	PLUS           reduce using rule 22
@@ -1352,7 +1327,6 @@ State 104
 	LEFT           reduce using rule 46
 	RIGHT          reduce using rule 46
 	FULL           reduce using rule 46
-	OUTER          reduce using rule 46
 	WHERE          shift, and enter state 143
 			(reduce using rule 46)
 
@@ -1395,10 +1369,10 @@ State 107
 
 State 108
 
-	BooleanExpression -> '(' BooleanExpression . ')'    (rule 55)
-	BooleanExpression -> BooleanExpression . AND BooleanExpression    (rule 56)
-	BooleanExpression -> BooleanExpression . OR BooleanExpression    (rule 57)
-	BooleanExpression -> BooleanExpression . EQ BooleanExpression    (rule 59)
+	BooleanExpression -> '(' BooleanExpression . ')'    (rule 54)
+	BooleanExpression -> BooleanExpression . AND BooleanExpression    (rule 55)
+	BooleanExpression -> BooleanExpression . OR BooleanExpression    (rule 56)
+	BooleanExpression -> BooleanExpression . EQ BooleanExpression    (rule 58)
 
 	AND            shift, and enter state 119
 	OR             shift, and enter state 120
@@ -1408,14 +1382,14 @@ State 108
 
 State 109
 
-	BooleanExpression -> IndexExpression . "==" IndexExpression    (rule 61)
-	IndexExpression -> '(' IndexExpression . ')'        (rule 66)
-	IndexExpression -> IndexExpression . '+' IndexExpression    (rule 67)
-	IndexExpression -> IndexExpression . '-' IndexExpression    (rule 68)
-	IndexExpression -> IndexExpression . '*' IndexExpression    (rule 69)
-	IndexExpression -> IndexExpression . '//' IndexExpression    (rule 70)
-	IndexExpression -> IndexExpression . '%' IndexExpression    (rule 71)
-	IndexExpression -> IndexExpression . '^' IndexExpression    (rule 72)
+	BooleanExpression -> IndexExpression . "==" IndexExpression    (rule 60)
+	IndexExpression -> '(' IndexExpression . ')'        (rule 65)
+	IndexExpression -> IndexExpression . '+' IndexExpression    (rule 66)
+	IndexExpression -> IndexExpression . '-' IndexExpression    (rule 67)
+	IndexExpression -> IndexExpression . '*' IndexExpression    (rule 68)
+	IndexExpression -> IndexExpression . '//' IndexExpression    (rule 69)
+	IndexExpression -> IndexExpression . '%' IndexExpression    (rule 70)
+	IndexExpression -> IndexExpression . '^' IndexExpression    (rule 71)
 
 	"=="           shift, and enter state 111
 	'+'            shift, and enter state 112
@@ -1429,29 +1403,28 @@ State 109
 
 State 110
 
-	BooleanExpression -> BooleanExpression . AND BooleanExpression    (rule 56)
-	BooleanExpression -> BooleanExpression . OR BooleanExpression    (rule 57)
-	BooleanExpression -> NOT BooleanExpression .        (rule 58)
-	BooleanExpression -> BooleanExpression . EQ BooleanExpression    (rule 59)
+	BooleanExpression -> BooleanExpression . AND BooleanExpression    (rule 55)
+	BooleanExpression -> BooleanExpression . OR BooleanExpression    (rule 56)
+	BooleanExpression -> NOT BooleanExpression .        (rule 57)
+	BooleanExpression -> BooleanExpression . EQ BooleanExpression    (rule 58)
 
-	INNER          reduce using rule 58
-	LEFT           reduce using rule 58
-	RIGHT          reduce using rule 58
-	FULL           reduce using rule 58
-	OUTER          reduce using rule 58
-	WHERE          reduce using rule 58
-	WITHCONSTRAINT reduce using rule 58
+	INNER          reduce using rule 57
+	LEFT           reduce using rule 57
+	RIGHT          reduce using rule 57
+	FULL           reduce using rule 57
+	WHERE          reduce using rule 57
+	WITHCONSTRAINT reduce using rule 57
 	AND            shift, and enter state 119
 	OR             shift, and enter state 120
 	EQ             shift, and enter state 121
-	PLUS           reduce using rule 58
-	'-'            reduce using rule 58
-	')'            reduce using rule 58
+	PLUS           reduce using rule 57
+	'-'            reduce using rule 57
+	')'            reduce using rule 57
 
 
 State 111
 
-	BooleanExpression -> IndexExpression "==" . IndexExpression    (rule 61)
+	BooleanExpression -> IndexExpression "==" . IndexExpression    (rule 60)
 
 	INDEX          shift, and enter state 96
 	'('            shift, and enter state 130
@@ -1463,7 +1436,7 @@ State 111
 
 State 112
 
-	IndexExpression -> IndexExpression '+' . IndexExpression    (rule 67)
+	IndexExpression -> IndexExpression '+' . IndexExpression    (rule 66)
 
 	INDEX          shift, and enter state 96
 	'('            shift, and enter state 130
@@ -1475,7 +1448,7 @@ State 112
 
 State 113
 
-	IndexExpression -> IndexExpression '*' . IndexExpression    (rule 69)
+	IndexExpression -> IndexExpression '*' . IndexExpression    (rule 68)
 
 	INDEX          shift, and enter state 96
 	'('            shift, and enter state 130
@@ -1487,7 +1460,7 @@ State 113
 
 State 114
 
-	IndexExpression -> IndexExpression '//' . IndexExpression    (rule 70)
+	IndexExpression -> IndexExpression '//' . IndexExpression    (rule 69)
 
 	INDEX          shift, and enter state 96
 	'('            shift, and enter state 130
@@ -1499,7 +1472,7 @@ State 114
 
 State 115
 
-	IndexExpression -> IndexExpression '%' . IndexExpression    (rule 71)
+	IndexExpression -> IndexExpression '%' . IndexExpression    (rule 70)
 
 	INDEX          shift, and enter state 96
 	'('            shift, and enter state 130
@@ -1511,7 +1484,7 @@ State 115
 
 State 116
 
-	IndexExpression -> IndexExpression '^' . IndexExpression    (rule 72)
+	IndexExpression -> IndexExpression '^' . IndexExpression    (rule 71)
 
 	INDEX          shift, and enter state 96
 	'('            shift, and enter state 130
@@ -1523,7 +1496,7 @@ State 116
 
 State 117
 
-	IndexExpression -> IndexExpression '-' . IndexExpression    (rule 68)
+	IndexExpression -> IndexExpression '-' . IndexExpression    (rule 67)
 
 	INDEX          shift, and enter state 96
 	'('            shift, and enter state 130
@@ -1535,7 +1508,7 @@ State 117
 
 State 118
 
-	BooleanExpression -> SubExpression '=' . SubExpression    (rule 60)
+	BooleanExpression -> SubExpression '=' . SubExpression    (rule 59)
 
 	alphaNumericStringshift, and enter state 18
 	var            shift, and enter state 98
@@ -1546,7 +1519,7 @@ State 118
 
 State 119
 
-	BooleanExpression -> BooleanExpression AND . BooleanExpression    (rule 56)
+	BooleanExpression -> BooleanExpression AND . BooleanExpression    (rule 55)
 
 	NOT            shift, and enter state 95
 	INDEX          shift, and enter state 96
@@ -1565,7 +1538,7 @@ State 119
 
 State 120
 
-	BooleanExpression -> BooleanExpression OR . BooleanExpression    (rule 57)
+	BooleanExpression -> BooleanExpression OR . BooleanExpression    (rule 56)
 
 	NOT            shift, and enter state 95
 	INDEX          shift, and enter state 96
@@ -1584,7 +1557,7 @@ State 120
 
 State 121
 
-	BooleanExpression -> BooleanExpression EQ . BooleanExpression    (rule 59)
+	BooleanExpression -> BooleanExpression EQ . BooleanExpression    (rule 58)
 
 	NOT            shift, and enter state 95
 	INDEX          shift, and enter state 96
@@ -1619,7 +1592,6 @@ State 123
 	LEFT           reduce using rule 12
 	RIGHT          reduce using rule 12
 	FULL           reduce using rule 12
-	OUTER          reduce using rule 12
 	WHERE          reduce using rule 12
 	WITHCONSTRAINT reduce using rule 12
 	AND            reduce using rule 12
@@ -1641,7 +1613,6 @@ State 124
 	LEFT           reduce using rule 11
 	RIGHT          reduce using rule 11
 	FULL           reduce using rule 11
-	OUTER          reduce using rule 11
 	WHERE          reduce using rule 11
 	WITHCONSTRAINT reduce using rule 11
 	AND            reduce using rule 11
@@ -1656,63 +1627,39 @@ State 124
 
 State 125
 
-	BooleanExpression -> BooleanExpression . AND BooleanExpression    (rule 56)
-	BooleanExpression -> BooleanExpression . OR BooleanExpression    (rule 57)
-	BooleanExpression -> BooleanExpression . EQ BooleanExpression    (rule 59)
-	BooleanExpression -> BooleanExpression EQ BooleanExpression .    (rule 59)
+	BooleanExpression -> BooleanExpression . AND BooleanExpression    (rule 55)
+	BooleanExpression -> BooleanExpression . OR BooleanExpression    (rule 56)
+	BooleanExpression -> BooleanExpression . EQ BooleanExpression    (rule 58)
+	BooleanExpression -> BooleanExpression EQ BooleanExpression .    (rule 58)
 
-	INNER          reduce using rule 59
-	LEFT           reduce using rule 59
-	RIGHT          reduce using rule 59
-	FULL           reduce using rule 59
-	OUTER          reduce using rule 59
-	WHERE          reduce using rule 59
-	WITHCONSTRAINT reduce using rule 59
-	AND            reduce using rule 59
-	OR             reduce using rule 59
+	INNER          reduce using rule 58
+	LEFT           reduce using rule 58
+	RIGHT          reduce using rule 58
+	FULL           reduce using rule 58
+	WHERE          reduce using rule 58
+	WITHCONSTRAINT reduce using rule 58
+	AND            reduce using rule 58
+	OR             reduce using rule 58
 	EQ             shift, and enter state 121
-	PLUS           reduce using rule 59
-	'-'            reduce using rule 59
-	')'            reduce using rule 59
+	PLUS           reduce using rule 58
+	'-'            reduce using rule 58
+	')'            reduce using rule 58
 
 
 State 126
 
-	BooleanExpression -> BooleanExpression . AND BooleanExpression    (rule 56)
-	BooleanExpression -> BooleanExpression . OR BooleanExpression    (rule 57)
-	BooleanExpression -> BooleanExpression OR BooleanExpression .    (rule 57)
-	BooleanExpression -> BooleanExpression . EQ BooleanExpression    (rule 59)
-
-	INNER          reduce using rule 57
-	LEFT           reduce using rule 57
-	RIGHT          reduce using rule 57
-	FULL           reduce using rule 57
-	OUTER          reduce using rule 57
-	WHERE          reduce using rule 57
-	WITHCONSTRAINT reduce using rule 57
-	AND            reduce using rule 57
-	OR             shift, and enter state 120
-	EQ             shift, and enter state 121
-	PLUS           reduce using rule 57
-	'-'            reduce using rule 57
-	')'            reduce using rule 57
-
-
-State 127
-
-	BooleanExpression -> BooleanExpression . AND BooleanExpression    (rule 56)
-	BooleanExpression -> BooleanExpression AND BooleanExpression .    (rule 56)
-	BooleanExpression -> BooleanExpression . OR BooleanExpression    (rule 57)
-	BooleanExpression -> BooleanExpression . EQ BooleanExpression    (rule 59)
+	BooleanExpression -> BooleanExpression . AND BooleanExpression    (rule 55)
+	BooleanExpression -> BooleanExpression . OR BooleanExpression    (rule 56)
+	BooleanExpression -> BooleanExpression OR BooleanExpression .    (rule 56)
+	BooleanExpression -> BooleanExpression . EQ BooleanExpression    (rule 58)
 
 	INNER          reduce using rule 56
 	LEFT           reduce using rule 56
 	RIGHT          reduce using rule 56
 	FULL           reduce using rule 56
-	OUTER          reduce using rule 56
 	WHERE          reduce using rule 56
 	WITHCONSTRAINT reduce using rule 56
-	AND            shift, and enter state 119
+	AND            reduce using rule 56
 	OR             shift, and enter state 120
 	EQ             shift, and enter state 121
 	PLUS           reduce using rule 56
@@ -1720,227 +1667,59 @@ State 127
 	')'            reduce using rule 56
 
 
+State 127
+
+	BooleanExpression -> BooleanExpression . AND BooleanExpression    (rule 55)
+	BooleanExpression -> BooleanExpression AND BooleanExpression .    (rule 55)
+	BooleanExpression -> BooleanExpression . OR BooleanExpression    (rule 56)
+	BooleanExpression -> BooleanExpression . EQ BooleanExpression    (rule 58)
+
+	INNER          reduce using rule 55
+	LEFT           reduce using rule 55
+	RIGHT          reduce using rule 55
+	FULL           reduce using rule 55
+	WHERE          reduce using rule 55
+	WITHCONSTRAINT reduce using rule 55
+	AND            shift, and enter state 119
+	OR             shift, and enter state 120
+	EQ             shift, and enter state 121
+	PLUS           reduce using rule 55
+	'-'            reduce using rule 55
+	')'            reduce using rule 55
+
+
 State 128
 
-	BooleanExpression -> SubExpression '=' SubExpression .    (rule 60)
+	BooleanExpression -> SubExpression '=' SubExpression .    (rule 59)
 
-	INNER          reduce using rule 60
-	LEFT           reduce using rule 60
-	RIGHT          reduce using rule 60
-	FULL           reduce using rule 60
-	OUTER          reduce using rule 60
-	WHERE          reduce using rule 60
-	WITHCONSTRAINT reduce using rule 60
-	AND            reduce using rule 60
-	OR             reduce using rule 60
-	EQ             reduce using rule 60
-	PLUS           reduce using rule 60
-	'-'            reduce using rule 60
-	')'            reduce using rule 60
+	INNER          reduce using rule 59
+	LEFT           reduce using rule 59
+	RIGHT          reduce using rule 59
+	FULL           reduce using rule 59
+	WHERE          reduce using rule 59
+	WITHCONSTRAINT reduce using rule 59
+	AND            reduce using rule 59
+	OR             reduce using rule 59
+	EQ             reduce using rule 59
+	PLUS           reduce using rule 59
+	'-'            reduce using rule 59
+	')'            reduce using rule 59
 
 
 State 129
 
-	IndexExpression -> IndexExpression . '+' IndexExpression    (rule 67)
-	IndexExpression -> IndexExpression . '-' IndexExpression    (rule 68)
-	IndexExpression -> IndexExpression '-' IndexExpression .    (rule 68)
-	IndexExpression -> IndexExpression . '*' IndexExpression    (rule 69)
-	IndexExpression -> IndexExpression . '//' IndexExpression    (rule 70)
-	IndexExpression -> IndexExpression . '%' IndexExpression    (rule 71)
-	IndexExpression -> IndexExpression . '^' IndexExpression    (rule 72)
-
-	INNER          reduce using rule 68
-	LEFT           reduce using rule 68
-	RIGHT          reduce using rule 68
-	FULL           reduce using rule 68
-	OUTER          reduce using rule 68
-	WHERE          reduce using rule 68
-	WITHCONSTRAINT reduce using rule 68
-	AND            reduce using rule 68
-	OR             reduce using rule 68
-	EQ             reduce using rule 68
-	PLUS           reduce using rule 68
-	"=="           reduce using rule 68
-	'+'            reduce using rule 68
-	'*'            reduce using rule 68
-	'//'           shift, and enter state 114
-			(reduce using rule 68)
-
-	'%'            reduce using rule 68
-	'^'            reduce using rule 68
-	'-'            reduce using rule 68
-	')'            reduce using rule 68
-
-
-State 130
-
-	IndexExpression -> '(' . IndexExpression ')'        (rule 66)
-
-	INDEX          shift, and enter state 96
-	'('            shift, and enter state 130
-	positiveNum    shift, and enter state 59
-	negativeNum    shift, and enter state 60
-
-	IndexExpressiongoto state 149
-	Number         goto state 94
-
-State 131
-
-	IndexExpression -> IndexExpression . '+' IndexExpression    (rule 67)
-	IndexExpression -> IndexExpression . '-' IndexExpression    (rule 68)
-	IndexExpression -> IndexExpression . '*' IndexExpression    (rule 69)
-	IndexExpression -> IndexExpression . '//' IndexExpression    (rule 70)
-	IndexExpression -> IndexExpression . '%' IndexExpression    (rule 71)
-	IndexExpression -> IndexExpression . '^' IndexExpression    (rule 72)
-	IndexExpression -> IndexExpression '^' IndexExpression .    (rule 72)
-
-	INNER          reduce using rule 72
-	LEFT           reduce using rule 72
-	RIGHT          reduce using rule 72
-	FULL           reduce using rule 72
-	OUTER          reduce using rule 72
-	WHERE          reduce using rule 72
-	WITHCONSTRAINT reduce using rule 72
-	AND            reduce using rule 72
-	OR             reduce using rule 72
-	EQ             reduce using rule 72
-	PLUS           reduce using rule 72
-	"=="           reduce using rule 72
-	'+'            shift, and enter state 112
-	'*'            shift, and enter state 113
-	'//'           shift, and enter state 114
-			(reduce using rule 72)
-
-	'%'            shift, and enter state 115
-	'^'            shift, and enter state 116
-	'-'            shift, and enter state 117
-	')'            reduce using rule 72
-
-
-State 132
-
-	IndexExpression -> IndexExpression . '+' IndexExpression    (rule 67)
-	IndexExpression -> IndexExpression . '-' IndexExpression    (rule 68)
-	IndexExpression -> IndexExpression . '*' IndexExpression    (rule 69)
-	IndexExpression -> IndexExpression . '//' IndexExpression    (rule 70)
-	IndexExpression -> IndexExpression . '%' IndexExpression    (rule 71)
-	IndexExpression -> IndexExpression '%' IndexExpression .    (rule 71)
-	IndexExpression -> IndexExpression . '^' IndexExpression    (rule 72)
-
-	INNER          reduce using rule 71
-	LEFT           reduce using rule 71
-	RIGHT          reduce using rule 71
-	FULL           reduce using rule 71
-	OUTER          reduce using rule 71
-	WHERE          reduce using rule 71
-	WITHCONSTRAINT reduce using rule 71
-	AND            reduce using rule 71
-	OR             reduce using rule 71
-	EQ             reduce using rule 71
-	PLUS           reduce using rule 71
-	"=="           reduce using rule 71
-	'+'            shift, and enter state 112
-	'*'            reduce using rule 71
-	'//'           shift, and enter state 114
-			(reduce using rule 71)
-
-	'%'            reduce using rule 71
-	'^'            reduce using rule 71
-	'-'            shift, and enter state 117
-	')'            reduce using rule 71
-
-
-State 133
-
-	IndexExpression -> IndexExpression . '+' IndexExpression    (rule 67)
-	IndexExpression -> IndexExpression . '-' IndexExpression    (rule 68)
-	IndexExpression -> IndexExpression . '*' IndexExpression    (rule 69)
-	IndexExpression -> IndexExpression . '//' IndexExpression    (rule 70)
-	IndexExpression -> IndexExpression '//' IndexExpression .    (rule 70)
-	IndexExpression -> IndexExpression . '%' IndexExpression    (rule 71)
-	IndexExpression -> IndexExpression . '^' IndexExpression    (rule 72)
-
-	INNER          reduce using rule 70
-	LEFT           reduce using rule 70
-	RIGHT          reduce using rule 70
-	FULL           reduce using rule 70
-	OUTER          reduce using rule 70
-	WHERE          reduce using rule 70
-	WITHCONSTRAINT reduce using rule 70
-	AND            reduce using rule 70
-	OR             reduce using rule 70
-	EQ             reduce using rule 70
-	PLUS           reduce using rule 70
-	"=="           reduce using rule 70
-	'+'            shift, and enter state 112
-			(reduce using rule 70)
-
-	'*'            shift, and enter state 113
-			(reduce using rule 70)
-
-	'//'           shift, and enter state 114
-			(reduce using rule 70)
-
-	'%'            shift, and enter state 115
-			(reduce using rule 70)
-
-	'^'            shift, and enter state 116
-			(reduce using rule 70)
-
-	'-'            shift, and enter state 117
-			(reduce using rule 70)
-
-	')'            reduce using rule 70
-
-
-State 134
-
-	IndexExpression -> IndexExpression . '+' IndexExpression    (rule 67)
-	IndexExpression -> IndexExpression . '-' IndexExpression    (rule 68)
-	IndexExpression -> IndexExpression . '*' IndexExpression    (rule 69)
-	IndexExpression -> IndexExpression '*' IndexExpression .    (rule 69)
-	IndexExpression -> IndexExpression . '//' IndexExpression    (rule 70)
-	IndexExpression -> IndexExpression . '%' IndexExpression    (rule 71)
-	IndexExpression -> IndexExpression . '^' IndexExpression    (rule 72)
-
-	INNER          reduce using rule 69
-	LEFT           reduce using rule 69
-	RIGHT          reduce using rule 69
-	FULL           reduce using rule 69
-	OUTER          reduce using rule 69
-	WHERE          reduce using rule 69
-	WITHCONSTRAINT reduce using rule 69
-	AND            reduce using rule 69
-	OR             reduce using rule 69
-	EQ             reduce using rule 69
-	PLUS           reduce using rule 69
-	"=="           reduce using rule 69
-	'+'            shift, and enter state 112
-	'*'            reduce using rule 69
-	'//'           shift, and enter state 114
-			(reduce using rule 69)
-
-	'%'            reduce using rule 69
-	'^'            reduce using rule 69
-	'-'            shift, and enter state 117
-	')'            reduce using rule 69
-
-
-State 135
-
-	IndexExpression -> IndexExpression . '+' IndexExpression    (rule 67)
-	IndexExpression -> IndexExpression '+' IndexExpression .    (rule 67)
-	IndexExpression -> IndexExpression . '-' IndexExpression    (rule 68)
-	IndexExpression -> IndexExpression . '*' IndexExpression    (rule 69)
-	IndexExpression -> IndexExpression . '//' IndexExpression    (rule 70)
-	IndexExpression -> IndexExpression . '%' IndexExpression    (rule 71)
-	IndexExpression -> IndexExpression . '^' IndexExpression    (rule 72)
+	IndexExpression -> IndexExpression . '+' IndexExpression    (rule 66)
+	IndexExpression -> IndexExpression . '-' IndexExpression    (rule 67)
+	IndexExpression -> IndexExpression '-' IndexExpression .    (rule 67)
+	IndexExpression -> IndexExpression . '*' IndexExpression    (rule 68)
+	IndexExpression -> IndexExpression . '//' IndexExpression    (rule 69)
+	IndexExpression -> IndexExpression . '%' IndexExpression    (rule 70)
+	IndexExpression -> IndexExpression . '^' IndexExpression    (rule 71)
 
 	INNER          reduce using rule 67
 	LEFT           reduce using rule 67
 	RIGHT          reduce using rule 67
 	FULL           reduce using rule 67
-	OUTER          reduce using rule 67
 	WHERE          reduce using rule 67
 	WITHCONSTRAINT reduce using rule 67
 	AND            reduce using rule 67
@@ -1959,45 +1738,170 @@ State 135
 	')'            reduce using rule 67
 
 
-State 136
+State 130
 
-	BooleanExpression -> IndexExpression "==" IndexExpression .    (rule 61)
-	IndexExpression -> IndexExpression . '+' IndexExpression    (rule 67)
-	IndexExpression -> IndexExpression . '-' IndexExpression    (rule 68)
-	IndexExpression -> IndexExpression . '*' IndexExpression    (rule 69)
-	IndexExpression -> IndexExpression . '//' IndexExpression    (rule 70)
-	IndexExpression -> IndexExpression . '%' IndexExpression    (rule 71)
-	IndexExpression -> IndexExpression . '^' IndexExpression    (rule 72)
+	IndexExpression -> '(' . IndexExpression ')'        (rule 65)
 
-	INNER          reduce using rule 61
-	LEFT           reduce using rule 61
-	RIGHT          reduce using rule 61
-	FULL           reduce using rule 61
-	OUTER          reduce using rule 61
-	WHERE          reduce using rule 61
-	WITHCONSTRAINT reduce using rule 61
-	AND            reduce using rule 61
-	OR             reduce using rule 61
-	EQ             reduce using rule 61
-	PLUS           reduce using rule 61
+	INDEX          shift, and enter state 96
+	'('            shift, and enter state 130
+	positiveNum    shift, and enter state 59
+	negativeNum    shift, and enter state 60
+
+	IndexExpressiongoto state 149
+	Number         goto state 94
+
+State 131
+
+	IndexExpression -> IndexExpression . '+' IndexExpression    (rule 66)
+	IndexExpression -> IndexExpression . '-' IndexExpression    (rule 67)
+	IndexExpression -> IndexExpression . '*' IndexExpression    (rule 68)
+	IndexExpression -> IndexExpression . '//' IndexExpression    (rule 69)
+	IndexExpression -> IndexExpression . '%' IndexExpression    (rule 70)
+	IndexExpression -> IndexExpression . '^' IndexExpression    (rule 71)
+	IndexExpression -> IndexExpression '^' IndexExpression .    (rule 71)
+
+	INNER          reduce using rule 71
+	LEFT           reduce using rule 71
+	RIGHT          reduce using rule 71
+	FULL           reduce using rule 71
+	WHERE          reduce using rule 71
+	WITHCONSTRAINT reduce using rule 71
+	AND            reduce using rule 71
+	OR             reduce using rule 71
+	EQ             reduce using rule 71
+	PLUS           reduce using rule 71
+	"=="           reduce using rule 71
 	'+'            shift, and enter state 112
 	'*'            shift, and enter state 113
 	'//'           shift, and enter state 114
+			(reduce using rule 71)
+
 	'%'            shift, and enter state 115
 	'^'            shift, and enter state 116
-	'-'            reduce using rule 61
-	')'            reduce using rule 61
+	'-'            shift, and enter state 117
+	')'            reduce using rule 71
 
 
-State 137
+State 132
 
-	IndexExpression -> '(' IndexExpression ')' .        (rule 66)
+	IndexExpression -> IndexExpression . '+' IndexExpression    (rule 66)
+	IndexExpression -> IndexExpression . '-' IndexExpression    (rule 67)
+	IndexExpression -> IndexExpression . '*' IndexExpression    (rule 68)
+	IndexExpression -> IndexExpression . '//' IndexExpression    (rule 69)
+	IndexExpression -> IndexExpression . '%' IndexExpression    (rule 70)
+	IndexExpression -> IndexExpression '%' IndexExpression .    (rule 70)
+	IndexExpression -> IndexExpression . '^' IndexExpression    (rule 71)
+
+	INNER          reduce using rule 70
+	LEFT           reduce using rule 70
+	RIGHT          reduce using rule 70
+	FULL           reduce using rule 70
+	WHERE          reduce using rule 70
+	WITHCONSTRAINT reduce using rule 70
+	AND            reduce using rule 70
+	OR             reduce using rule 70
+	EQ             reduce using rule 70
+	PLUS           reduce using rule 70
+	"=="           reduce using rule 70
+	'+'            shift, and enter state 112
+	'*'            reduce using rule 70
+	'//'           shift, and enter state 114
+			(reduce using rule 70)
+
+	'%'            reduce using rule 70
+	'^'            reduce using rule 70
+	'-'            shift, and enter state 117
+	')'            reduce using rule 70
+
+
+State 133
+
+	IndexExpression -> IndexExpression . '+' IndexExpression    (rule 66)
+	IndexExpression -> IndexExpression . '-' IndexExpression    (rule 67)
+	IndexExpression -> IndexExpression . '*' IndexExpression    (rule 68)
+	IndexExpression -> IndexExpression . '//' IndexExpression    (rule 69)
+	IndexExpression -> IndexExpression '//' IndexExpression .    (rule 69)
+	IndexExpression -> IndexExpression . '%' IndexExpression    (rule 70)
+	IndexExpression -> IndexExpression . '^' IndexExpression    (rule 71)
+
+	INNER          reduce using rule 69
+	LEFT           reduce using rule 69
+	RIGHT          reduce using rule 69
+	FULL           reduce using rule 69
+	WHERE          reduce using rule 69
+	WITHCONSTRAINT reduce using rule 69
+	AND            reduce using rule 69
+	OR             reduce using rule 69
+	EQ             reduce using rule 69
+	PLUS           reduce using rule 69
+	"=="           reduce using rule 69
+	'+'            shift, and enter state 112
+			(reduce using rule 69)
+
+	'*'            shift, and enter state 113
+			(reduce using rule 69)
+
+	'//'           shift, and enter state 114
+			(reduce using rule 69)
+
+	'%'            shift, and enter state 115
+			(reduce using rule 69)
+
+	'^'            shift, and enter state 116
+			(reduce using rule 69)
+
+	'-'            shift, and enter state 117
+			(reduce using rule 69)
+
+	')'            reduce using rule 69
+
+
+State 134
+
+	IndexExpression -> IndexExpression . '+' IndexExpression    (rule 66)
+	IndexExpression -> IndexExpression . '-' IndexExpression    (rule 67)
+	IndexExpression -> IndexExpression . '*' IndexExpression    (rule 68)
+	IndexExpression -> IndexExpression '*' IndexExpression .    (rule 68)
+	IndexExpression -> IndexExpression . '//' IndexExpression    (rule 69)
+	IndexExpression -> IndexExpression . '%' IndexExpression    (rule 70)
+	IndexExpression -> IndexExpression . '^' IndexExpression    (rule 71)
+
+	INNER          reduce using rule 68
+	LEFT           reduce using rule 68
+	RIGHT          reduce using rule 68
+	FULL           reduce using rule 68
+	WHERE          reduce using rule 68
+	WITHCONSTRAINT reduce using rule 68
+	AND            reduce using rule 68
+	OR             reduce using rule 68
+	EQ             reduce using rule 68
+	PLUS           reduce using rule 68
+	"=="           reduce using rule 68
+	'+'            shift, and enter state 112
+	'*'            reduce using rule 68
+	'//'           shift, and enter state 114
+			(reduce using rule 68)
+
+	'%'            reduce using rule 68
+	'^'            reduce using rule 68
+	'-'            shift, and enter state 117
+	')'            reduce using rule 68
+
+
+State 135
+
+	IndexExpression -> IndexExpression . '+' IndexExpression    (rule 66)
+	IndexExpression -> IndexExpression '+' IndexExpression .    (rule 66)
+	IndexExpression -> IndexExpression . '-' IndexExpression    (rule 67)
+	IndexExpression -> IndexExpression . '*' IndexExpression    (rule 68)
+	IndexExpression -> IndexExpression . '//' IndexExpression    (rule 69)
+	IndexExpression -> IndexExpression . '%' IndexExpression    (rule 70)
+	IndexExpression -> IndexExpression . '^' IndexExpression    (rule 71)
 
 	INNER          reduce using rule 66
 	LEFT           reduce using rule 66
 	RIGHT          reduce using rule 66
 	FULL           reduce using rule 66
-	OUTER          reduce using rule 66
 	WHERE          reduce using rule 66
 	WITHCONSTRAINT reduce using rule 66
 	AND            reduce using rule 66
@@ -2007,30 +1911,84 @@ State 137
 	"=="           reduce using rule 66
 	'+'            reduce using rule 66
 	'*'            reduce using rule 66
-	'//'           reduce using rule 66
+	'//'           shift, and enter state 114
+			(reduce using rule 66)
+
 	'%'            reduce using rule 66
 	'^'            reduce using rule 66
 	'-'            reduce using rule 66
 	')'            reduce using rule 66
 
 
+State 136
+
+	BooleanExpression -> IndexExpression "==" IndexExpression .    (rule 60)
+	IndexExpression -> IndexExpression . '+' IndexExpression    (rule 66)
+	IndexExpression -> IndexExpression . '-' IndexExpression    (rule 67)
+	IndexExpression -> IndexExpression . '*' IndexExpression    (rule 68)
+	IndexExpression -> IndexExpression . '//' IndexExpression    (rule 69)
+	IndexExpression -> IndexExpression . '%' IndexExpression    (rule 70)
+	IndexExpression -> IndexExpression . '^' IndexExpression    (rule 71)
+
+	INNER          reduce using rule 60
+	LEFT           reduce using rule 60
+	RIGHT          reduce using rule 60
+	FULL           reduce using rule 60
+	WHERE          reduce using rule 60
+	WITHCONSTRAINT reduce using rule 60
+	AND            reduce using rule 60
+	OR             reduce using rule 60
+	EQ             reduce using rule 60
+	PLUS           reduce using rule 60
+	'+'            shift, and enter state 112
+	'*'            shift, and enter state 113
+	'//'           shift, and enter state 114
+	'%'            shift, and enter state 115
+	'^'            shift, and enter state 116
+	'-'            reduce using rule 60
+	')'            reduce using rule 60
+
+
+State 137
+
+	IndexExpression -> '(' IndexExpression ')' .        (rule 65)
+
+	INNER          reduce using rule 65
+	LEFT           reduce using rule 65
+	RIGHT          reduce using rule 65
+	FULL           reduce using rule 65
+	WHERE          reduce using rule 65
+	WITHCONSTRAINT reduce using rule 65
+	AND            reduce using rule 65
+	OR             reduce using rule 65
+	EQ             reduce using rule 65
+	PLUS           reduce using rule 65
+	"=="           reduce using rule 65
+	'+'            reduce using rule 65
+	'*'            reduce using rule 65
+	'//'           reduce using rule 65
+	'%'            reduce using rule 65
+	'^'            reduce using rule 65
+	'-'            reduce using rule 65
+	')'            reduce using rule 65
+
+
 State 138
 
-	BooleanExpression -> '(' BooleanExpression ')' .    (rule 55)
+	BooleanExpression -> '(' BooleanExpression ')' .    (rule 54)
 
-	INNER          reduce using rule 55
-	LEFT           reduce using rule 55
-	RIGHT          reduce using rule 55
-	FULL           reduce using rule 55
-	OUTER          reduce using rule 55
-	WHERE          reduce using rule 55
-	WITHCONSTRAINT reduce using rule 55
-	AND            reduce using rule 55
-	OR             reduce using rule 55
-	EQ             reduce using rule 55
-	PLUS           reduce using rule 55
-	'-'            reduce using rule 55
-	')'            reduce using rule 55
+	INNER          reduce using rule 54
+	LEFT           reduce using rule 54
+	RIGHT          reduce using rule 54
+	FULL           reduce using rule 54
+	WHERE          reduce using rule 54
+	WITHCONSTRAINT reduce using rule 54
+	AND            reduce using rule 54
+	OR             reduce using rule 54
+	EQ             reduce using rule 54
+	PLUS           reduce using rule 54
+	'-'            reduce using rule 54
+	')'            reduce using rule 54
 
 
 State 139
@@ -2063,7 +2021,6 @@ State 142
 	LEFT           reduce using rule 48
 	RIGHT          reduce using rule 48
 	FULL           reduce using rule 48
-	OUTER          reduce using rule 48
 	WHERE          reduce using rule 48
 	WITHCONSTRAINT reduce using rule 48
 	PLUS           shift, and enter state 146
@@ -2096,15 +2053,14 @@ State 143
 State 144
 
 	WhereClause -> WHERE BooleanExpression .            (rule 45)
-	BooleanExpression -> BooleanExpression . AND BooleanExpression    (rule 56)
-	BooleanExpression -> BooleanExpression . OR BooleanExpression    (rule 57)
-	BooleanExpression -> BooleanExpression . EQ BooleanExpression    (rule 59)
+	BooleanExpression -> BooleanExpression . AND BooleanExpression    (rule 55)
+	BooleanExpression -> BooleanExpression . OR BooleanExpression    (rule 56)
+	BooleanExpression -> BooleanExpression . EQ BooleanExpression    (rule 58)
 
 	INNER          reduce using rule 45
 	LEFT           reduce using rule 45
 	RIGHT          reduce using rule 45
 	FULL           reduce using rule 45
-	OUTER          reduce using rule 45
 	WHERE          reduce using rule 45
 	WITHCONSTRAINT reduce using rule 45
 	AND            shift, and enter state 119
@@ -2123,7 +2079,6 @@ State 145
 	LEFT           reduce using rule 35
 	RIGHT          reduce using rule 35
 	FULL           reduce using rule 35
-	OUTER          reduce using rule 35
 	WHERE          reduce using rule 35
 	WITHCONSTRAINT reduce using rule 35
 	PLUS           reduce using rule 35
@@ -2171,7 +2126,6 @@ State 148
 	LEFT           reduce using rule 25
 	RIGHT          reduce using rule 25
 	FULL           reduce using rule 25
-	OUTER          reduce using rule 25
 	WHERE          reduce using rule 25
 	WITHCONSTRAINT reduce using rule 25
 	PLUS           reduce using rule 25
@@ -2181,13 +2135,13 @@ State 148
 
 State 149
 
-	IndexExpression -> '(' IndexExpression . ')'        (rule 66)
-	IndexExpression -> IndexExpression . '+' IndexExpression    (rule 67)
-	IndexExpression -> IndexExpression . '-' IndexExpression    (rule 68)
-	IndexExpression -> IndexExpression . '*' IndexExpression    (rule 69)
-	IndexExpression -> IndexExpression . '//' IndexExpression    (rule 70)
-	IndexExpression -> IndexExpression . '%' IndexExpression    (rule 71)
-	IndexExpression -> IndexExpression . '^' IndexExpression    (rule 72)
+	IndexExpression -> '(' IndexExpression . ')'        (rule 65)
+	IndexExpression -> IndexExpression . '+' IndexExpression    (rule 66)
+	IndexExpression -> IndexExpression . '-' IndexExpression    (rule 67)
+	IndexExpression -> IndexExpression . '*' IndexExpression    (rule 68)
+	IndexExpression -> IndexExpression . '//' IndexExpression    (rule 69)
+	IndexExpression -> IndexExpression . '%' IndexExpression    (rule 70)
+	IndexExpression -> IndexExpression . '^' IndexExpression    (rule 71)
 
 	'+'            shift, and enter state 112
 	'*'            shift, and enter state 113
@@ -2206,7 +2160,6 @@ State 150
 	LEFT           shift, and enter state 156
 	RIGHT          shift, and enter state 157
 	FULL           shift, and enter state 158
-	OUTER          shift, and enter state 159
 
 	JoinOperator   goto state 154
 
@@ -2218,7 +2171,6 @@ State 151
 	LEFT           reduce using rule 23
 	RIGHT          reduce using rule 23
 	FULL           reduce using rule 23
-	OUTER          reduce using rule 23
 	WHERE          reduce using rule 23
 	WITHCONSTRAINT reduce using rule 23
 	PLUS           reduce using rule 23
@@ -2234,7 +2186,6 @@ State 152
 	LEFT           reduce using rule 24
 	RIGHT          reduce using rule 24
 	FULL           reduce using rule 24
-	OUTER          reduce using rule 24
 	WHERE          reduce using rule 24
 	WITHCONSTRAINT reduce using rule 24
 	PLUS           reduce using rule 24
@@ -2250,7 +2201,6 @@ State 153
 	LEFT           reduce using rule 47
 	RIGHT          reduce using rule 47
 	FULL           reduce using rule 47
-	OUTER          reduce using rule 47
 	WHERE          reduce using rule 47
 	WITHCONSTRAINT reduce using rule 47
 	PLUS           reduce using rule 47
@@ -2267,53 +2217,37 @@ State 154
 	alphaNumericStringshift, and enter state 18
 
 	TableName      goto state 103
-	TableExpressiongoto state 165
+	TableExpressiongoto state 163
 
 State 155
 
 	JoinOperator -> INNER . JOIN                        (rule 50)
 
-	JOIN           shift, and enter state 164
+	JOIN           shift, and enter state 162
 
 
 State 156
 
 	JoinOperator -> LEFT . JOIN                         (rule 51)
 
-	JOIN           shift, and enter state 163
+	JOIN           shift, and enter state 161
 
 
 State 157
 
 	JoinOperator -> RIGHT . JOIN                        (rule 52)
 
-	JOIN           shift, and enter state 162
+	JOIN           shift, and enter state 160
 
 
 State 158
 
 	JoinOperator -> FULL . JOIN                         (rule 53)
 
-	JOIN           shift, and enter state 161
+	JOIN           shift, and enter state 159
 
 
 State 159
-
-	JoinOperator -> OUTER . JOIN                        (rule 54)
-
-	JOIN           shift, and enter state 160
-
-
-State 160
-
-	JoinOperator -> OUTER JOIN .                        (rule 54)
-
-	LET            reduce using rule 54
-	'('            reduce using rule 54
-	alphaNumericStringreduce using rule 54
-
-
-State 161
 
 	JoinOperator -> FULL JOIN .                         (rule 53)
 
@@ -2322,7 +2256,7 @@ State 161
 	alphaNumericStringreduce using rule 53
 
 
-State 162
+State 160
 
 	JoinOperator -> RIGHT JOIN .                        (rule 52)
 
@@ -2331,7 +2265,7 @@ State 162
 	alphaNumericStringreduce using rule 52
 
 
-State 163
+State 161
 
 	JoinOperator -> LEFT JOIN .                         (rule 51)
 
@@ -2340,7 +2274,7 @@ State 163
 	alphaNumericStringreduce using rule 51
 
 
-State 164
+State 162
 
 	JoinOperator -> INNER JOIN .                        (rule 50)
 
@@ -2349,14 +2283,14 @@ State 164
 	alphaNumericStringreduce using rule 50
 
 
-State 165
+State 163
 
 	JoinClause -> TableExpression JoinOperator TableExpression . WITHCONSTRAINT BooleanExpression    (rule 49)
 
-	WITHCONSTRAINT shift, and enter state 166
+	WITHCONSTRAINT shift, and enter state 164
 
 
-State 166
+State 164
 
 	JoinClause -> TableExpression JoinOperator TableExpression WITHCONSTRAINT . BooleanExpression    (rule 49)
 
@@ -2370,23 +2304,22 @@ State 166
 
 	TableName      goto state 89
 	ColumnReferencegoto state 90
-	BooleanExpressiongoto state 167
+	BooleanExpressiongoto state 165
 	SubExpression  goto state 92
 	IndexExpressiongoto state 93
 	Number         goto state 94
 
-State 167
+State 165
 
 	JoinClause -> TableExpression JoinOperator TableExpression WITHCONSTRAINT BooleanExpression .    (rule 49)
-	BooleanExpression -> BooleanExpression . AND BooleanExpression    (rule 56)
-	BooleanExpression -> BooleanExpression . OR BooleanExpression    (rule 57)
-	BooleanExpression -> BooleanExpression . EQ BooleanExpression    (rule 59)
+	BooleanExpression -> BooleanExpression . AND BooleanExpression    (rule 55)
+	BooleanExpression -> BooleanExpression . OR BooleanExpression    (rule 56)
+	BooleanExpression -> BooleanExpression . EQ BooleanExpression    (rule 58)
 
 	INNER          reduce using rule 49
 	LEFT           reduce using rule 49
 	RIGHT          reduce using rule 49
 	FULL           reduce using rule 49
-	OUTER          reduce using rule 49
 	WHERE          reduce using rule 49
 	WITHCONSTRAINT reduce using rule 49
 	AND            shift, and enter state 119
@@ -2400,7 +2333,7 @@ State 167
 -----------------------------------------------------------------------------
 Grammar Totals
 -----------------------------------------------------------------------------
-Number of rules: 75
-Number of terminals: 69
+Number of rules: 74
+Number of terminals: 68
 Number of non-terminals: 29
-Number of states: 168
+Number of states: 166

@@ -41,7 +41,6 @@ tokens :-
   LEFT                            { \p s -> PT p TokenLEFT }
   RIGHT                           { \p s -> PT p TokenRIGHT }
   FULL                            { \p s -> PT p TokenFULL }
-  OUTER                           { \p s -> PT p TokenOUTER }
   TABLE                           { \p s -> PT p TokenTABLE }
   AS                              { \p s -> PT p TokenAS }
   WITHLABELS                      { \p s -> PT p TokenWITHLABELS }
@@ -120,7 +119,6 @@ data Token =
   | TokenLEFT
   | TokenRIGHT
   | TokenFULL
-  | TokenOUTER
   | TokenTABLE
   | TokenAS 
   | TokenWITHLABELS
