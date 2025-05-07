@@ -16,7 +16,7 @@ import Data.List
 
 
 
-type TableContent = [[String]]
+type TableContent = [RowData]
 type Labels = [(String, Int)]
 type ColumnData = [String]
 type RowData = [String]
@@ -162,7 +162,7 @@ evalMerge tableName1 tableName2 boolExpr tableEnvironment = newTableContent
                                                         let item | null item1 = item2
                                                                  | otherwise = item1]
 
-matchRowListToExpression :: [[String]] -> [Int] -> BooleanExpression -> [TableName] -> TableEnvironment -> Bool
+matchRowListToExpression :: [RowData] -> [Int] -> BooleanExpression -> [TableName] -> TableEnvironment -> Bool
 matchRowListToExpression rows indices boolExpr tableNames tableEnvironment = matchRToBoolHelp boolExpr
   where
     matchRToBoolHelp :: BooleanExpression -> Bool
@@ -250,7 +250,7 @@ evalWhereClause (WhereTrue booleanExpression) tableName tableEnvironment = (tabl
 
 evalWhereClause WhereFalse tableName tableEnvironment = (tableName, tableEnvironment)
 
-matchRowToExpression :: [String] -> Int -> BooleanExpression -> TableName -> TableEnvironment -> Bool
+matchRowToExpression :: RowData -> Int -> BooleanExpression -> TableName -> TableEnvironment -> Bool
 matchRowToExpression row rowIndex booleanExpression tableName tableEnvironment = matchRToBoolHelp booleanExpression
   where
     matchRToBoolHelp :: BooleanExpression -> Bool
@@ -398,12 +398,11 @@ evalJoin (JoinClause leftTableExpression joinOperator rightTableExpression boolE
     (rightTableName, finalTableEnv) = evalTableExpression rightTableExpression leftTableEnv
     T leftTableContent _ = lookupTable leftTableName finalTableEnv
     T rightTableContent _ = lookupTable rightTableName finalTableEnv
-    leftArity = length (head leftTableContent)
     rightArity = length (head rightTableContent)
 
     --Given two rows, it creates a joined row based on the boolean expression given
     --It also returns whether or not the rows match the boolean expression given
-    createJoinedRow :: Int -> Int -> ([String],Bool)
+    createJoinedRow :: Int -> Int -> (RowData,Bool)
     createJoinedRow leftIndex rightIndex = (joinedRow, match)
       where
         leftRow = leftTableContent!!leftIndex
@@ -446,15 +445,6 @@ evalJoin (JoinClause leftTableExpression joinOperator rightTableExpression boolE
     getJoinColumns (BooleanIndexExpression _ _)
       = Nothing
 
-
-
-
-
-
-
-updateTableEnvironmentWithList :: TableEnvironment -> TableEnvironment -> TableEnvironment
-updateTableEnvironmentWithList [] originalTableEnvironment = originalTableEnvironment
-updateTableEnvironmentWithList (tableVar:tableVars) originalTableEnvironment = updateTableEnvironmentWithList tableVars (updateTableEnvironment tableVar originalTableEnvironment)
 
 
 evalProduct :: TableName -> TableName -> TableEnvironment -> TableContent
