@@ -318,7 +318,143 @@ evalMaxClause (MaxTrue _) _ = error "evalMaxClause: input number cannot be negat
 evalMaxClause MaxFalse tableContent = tableContent
 
 evalJoin :: JoinClause -> TableEnvironment -> TableContent
-evalJoin joinClause tableEnvironment = undefined
+evalJoin (JoinClause leftTableExpression joinOperator rightTableExpression boolExpr) tableEnv
+     = case joinOperator of
+          JoinInner -> [newRow |
+                          leftIndex <- [1 .. (length leftTableContent)],
+                          let leftRow = leftTableContent !! (leftIndex - 1),
+                          rightIndex <- [1 .. (length rightTableContent)],
+                          let rightRow = rightTableContent !! (rightIndex - 1),
+                          let (newRow,_) = createJoinedRow leftIndex rightIndex,
+                          matchRowListToExpression
+                            [leftRow, rightRow] [leftIndex,rightIndex] boolExpr [leftTableName, rightTableName] finalTableEnv]
+
+          JoinLeft -> [newRow |
+                          leftIndex <- [1 .. (length leftTableContent)],
+                          let leftRow = leftTableContent !! (leftIndex - 1),
+                          rightIndex <- [1 .. (length rightTableContent)],
+                          let rightRow = rightTableContent !! (rightIndex - 1),
+                          let (newRow,_) = createJoinedRow leftIndex rightIndex,
+                          matchRowListToExpression
+                            [leftRow, rightRow] [leftIndex,rightIndex] boolExpr [leftTableName, rightTableName] finalTableEnv]
+
+                  ++ [newRow |
+                          leftIndex <- [1 .. (length leftTableContent)],
+                          let leftRow = leftTableContent !! (leftIndex - 1),
+                          let (newRow,_) = createJoinedRow leftIndex 0,
+                          not (or [matchRowListToExpression
+                                    [leftRow, rightRow] [leftIndex,rightIndex] boolExpr [leftTableName, rightTableName] finalTableEnv |
+                                    rightIndex <- [1 .. (length rightTableContent)],
+                                    let rightRow = rightTableContent !! (rightIndex - 1)])]
+          JoinRight -> [newRow |
+                          leftIndex <- [1 .. (length leftTableContent)],
+                          let leftRow = leftTableContent !! (leftIndex - 1),
+                          rightIndex <- [1 .. (length rightTableContent)],
+                          let rightRow = rightTableContent !! (rightIndex - 1),
+                          let (newRow,_) = createJoinedRow leftIndex rightIndex,
+                          matchRowListToExpression
+                            [leftRow, rightRow] [leftIndex,rightIndex] boolExpr [leftTableName, rightTableName] finalTableEnv]
+
+                  ++ [newRow |
+                          rightIndex <- [1 .. (length rightTableContent)],
+                          let rightRow = rightTableContent !! (rightIndex - 1),
+                          let (newRow,_) = createJoinedRow 0 rightIndex,
+                          not (or [matchRowListToExpression
+                                     [leftRow, rightRow] [leftIndex, rightIndex] boolExpr
+                                     [leftTableName, rightTableName] finalTableEnv |
+                                     let leftRow = rightTableContent !! (rightIndex - 1),
+                                     leftIndex <- [1 .. (length rightTableContent)]])]
+          JoinFull -> [newRow |
+                          leftIndex <- [1 .. (length leftTableContent)],
+                          let leftRow = leftTableContent !! (leftIndex - 1),
+                          rightIndex <- [1 .. (length rightTableContent)],
+                          let rightRow = rightTableContent !! (rightIndex - 1),
+                          let (newRow,_) = createJoinedRow leftIndex rightIndex,
+                          matchRowListToExpression
+                            [leftRow, rightRow] [leftIndex,rightIndex] boolExpr [leftTableName, rightTableName] finalTableEnv]
+
+                  ++ [newRow |
+                          leftIndex <- [1 .. (length leftTableContent)],
+                          let leftRow = leftTableContent !! (leftIndex - 1),
+                          let (newRow,_) = createJoinedRow leftIndex 0,
+                          not (or [matchRowListToExpression
+                                    [leftRow, rightRow] [leftIndex,rightIndex] boolExpr [leftTableName, rightTableName] finalTableEnv |
+                                    rightIndex <- [1 .. (length rightTableContent)],
+                                    let rightRow = rightTableContent !! (rightIndex - 1)])]
+
+                  ++ [newRow |
+                          rightIndex <- [1 .. (length rightTableContent)],
+                          let rightRow = rightTableContent !! (rightIndex - 1),
+                          let (newRow,_) = createJoinedRow 0 rightIndex,
+                          not (or [matchRowListToExpression
+                                     [leftRow, rightRow] [leftIndex, rightIndex] boolExpr
+                                     [leftTableName, rightTableName] finalTableEnv |
+                                     let leftRow = rightTableContent !! (rightIndex - 1),
+                                     leftIndex <- [1 .. (length rightTableContent)]])]
+
+
+  where
+    (leftTableName, leftTableEnv) = evalTableExpression leftTableExpression tableEnv
+    (rightTableName, finalTableEnv) = evalTableExpression rightTableExpression leftTableEnv
+    T leftTableContent _ = lookupTable leftTableName finalTableEnv
+    T rightTableContent _ = lookupTable rightTableName finalTableEnv
+    leftArity = length (head leftTableContent)
+    rightArity = length (head rightTableContent)
+
+    --Given two rows, it creates a joined row based on the boolean expression given
+    --It also returns whether or not the rows match the boolean expression given
+    createJoinedRow :: Int -> Int -> ([String],Bool)
+    createJoinedRow leftIndex rightIndex = (joinedRow, match)
+      where
+        leftRow = leftTableContent!!leftIndex
+        rightRow = rightTableContent!!rightIndex
+
+        joinColumns = getJoinColumns boolExpr
+        (joinedRow, match) = case joinColumns of
+                                Just (leftCol, rightCol) | leftRow!!leftCol == rightRow!!rightCol -> (leftRow ++ removeAt rightCol rightRow, True)
+                                                         | otherwise -> (leftRow ++ replicate (rightArity-1) "",False)
+                                Nothing -> (leftRow ++ rightRow, True)
+
+
+    --Finds the indexes of the columns in both the left and right table to join on
+    --Returns Nothing if there is no column join constraint
+    getJoinColumns :: BooleanExpression -> Maybe (Int,Int)
+    getJoinColumns (BooleanBracket expression) = getJoinColumns expression
+    getJoinColumns (BooleanAND expression1 expression2)
+      = case (getJoinColumns expression1, getJoinColumns expression2) of
+          (Just _, Just _) -> error "You may only have column-join condition in a given join clause"
+          (Just joinCols, Nothing) -> Just joinCols
+          (Nothing, Just joinCols) -> Just joinCols
+          (Nothing, Nothing) -> Nothing
+    getJoinColumns (BooleanOR expression1 expression2)
+      = case (getJoinColumns expression1, getJoinColumns expression2) of
+          (Just _, Just _) -> error "You may only have column-join condition in a given join clause"
+          (Just joinCols, Nothing) -> Just joinCols
+          (Nothing, Just joinCols) -> Just joinCols
+          (Nothing, Nothing) -> Nothing
+    getJoinColumns (BooleanNOT expression)  = getJoinColumns expression
+    getJoinColumns (BooleanEQ expression1 expression2)
+      = case (getJoinColumns expression1, getJoinColumns expression2) of
+          (Just _, Just _) -> error "You may only have column-join condition in a given join clause"
+          (Just joinCols, Nothing) -> Just joinCols
+          (Nothing, Just joinCols) -> Just joinCols
+          (Nothing, Nothing) -> Nothing
+    getJoinColumns (BooleanSubExpression se1 se2)
+      = case (se1, se2) of
+          (SubColumn leftColRef, SubColumn rightColRef) -> Just (getLabelIndex leftColRef tableEnv -1, getLabelIndex rightColRef tableEnv -1)
+          (_,_) -> Nothing
+    getJoinColumns (BooleanIndexExpression _ _)
+      = Nothing
+
+
+
+
+
+
+
+updateTableEnvironmentWithList :: TableEnvironment -> TableEnvironment -> TableEnvironment
+updateTableEnvironmentWithList [] originalTableEnvironment = originalTableEnvironment
+updateTableEnvironmentWithList (tableVar:tableVars) originalTableEnvironment = updateTableEnvironmentWithList tableVars (updateTableEnvironment tableVar originalTableEnvironment)
 
 
 evalProduct :: TableName -> TableName -> TableEnvironment -> TableContent
