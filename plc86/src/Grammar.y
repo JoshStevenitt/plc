@@ -107,7 +107,9 @@ Input : INPUT FILE Filename AS TableAssignment          { Input $3 $5 }
 TableAssignment : TableName NOLABELS                    { NoLabels $1 }
         | TableName WITHLABELS ColumnLabels             { WithLabels $1 $3 }
 
-TableName : alphaNumericString                          { TableRef $1 }
+TableName : alphaLower                                  { TableRef $1 }
+            | alphaUpper                                { TableRef $1 }
+            | alphaNumericString                        { TableRef $1 }
 
 --Tables : TableName ',' TableName                        { TablesMultiple $1 $3 }
 --        | TableName                                     { TableSingular $1 }
@@ -115,10 +117,16 @@ TableName : alphaNumericString                          { TableRef $1 }
 
 ColumnLabels : '[' ColumnLabels2 ']'                    { LabelConstructor $2 }
 
-ColumnLabels2 : alphaNumericString ',' ColumnLabels2    { LabelsMultiple $1 $3}
+ColumnLabels2 : alphaLower ',' ColumnLabels2            { LabelsMultiple $1 $3}
+                | alphaUpper ',' ColumnLabels2          { LabelsMultiple $1 $3}
+                | alphaNumericString ',' ColumnLabels2    { LabelsMultiple $1 $3}
+                | alphaLower                            { LabelSingular $1} 
+                | alphaUpper                            { LabelSingular $1} 
                 | alphaNumericString                    { LabelSingular $1} 
 
-ColumnReference : TableName '.' alphaNumericString      { AlphaColumn $1 $3 }
+ColumnReference : TableName '.' alphaLower              { AlphaColumn $1 $3 }
+        | TableName '.' alphaUpper                      { AlphaColumn $1 $3 }
+        | TableName '.' alphaNumericString              { AlphaColumn $1 $3 }
         | TableName '.' int                             { IntegerColumn $1 $3 }
 
 Output : OUTPUT TableName TO OutputType                 { OutputConstruct $2 $4 }
@@ -129,7 +137,9 @@ OutputType : STANDARD                                   { Standard }
 Position : int ',' int                                  { Comma $1 $3 }
 
 Axis : COLUMN int                                       { ColumnInt $2 }
-        | COLUMN alphaNumericString                     { ColumnAlpha $2 }
+        | COLUMN alphaLower                             { ColumnAlpha $2 }
+        | COLUMN alphaUpper                                    { ColumnAlpha $2 }
+        | COLUMN alphaNumericString                            { ColumnAlpha $2 }
         | ROW int                                       { Row $2 }
 
 Queries : LET TableAssignment BE Query '-' Queries      { QueryLet $2 $4 $6 }
