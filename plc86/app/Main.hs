@@ -22,6 +22,7 @@ type ColumnData = [String]
 type RowData = [String]
 
 data Table = T TableContent Labels deriving (Read, Show)
+data JoinDir = L | R deriving (Read, Show, Eq)
 
 type TableVariable = (String, Table)
 type TableEnvironment = [TableVariable]
@@ -36,7 +37,7 @@ main = do
             let tree = parseCalc tokens
             eval tree
         [] -> do
-              putStr "Argument error: please give the name of the program file you want to run"
+            putStr "Argument error: please give the name of the program file you want to run"
 
 --The main evaluation function. 
 --This function calls smaller evaluation functions to perform the following tasks:
@@ -327,7 +328,7 @@ evalJoin (JoinClause leftTableExpression joinOperator rightTableExpression boolE
                           let leftRow = leftTableContent !! (leftIndex - 1),
                           rightIndex <- [1 .. (length rightTableContent)],
                           let rightRow = rightTableContent !! (rightIndex - 1),
-                          let (newRow,_) = createJoinedRow leftIndex rightIndex,
+                          let newRow = createJoinedRow (leftIndex-1) (rightIndex-1) L,
                           matchRowListToExpression
                             [leftRow, rightRow] [leftIndex,rightIndex] boolExpr [leftTableName, rightTableName] finalTableEnv]
 
@@ -336,14 +337,14 @@ evalJoin (JoinClause leftTableExpression joinOperator rightTableExpression boolE
                           let leftRow = leftTableContent !! (leftIndex - 1),
                           rightIndex <- [1 .. (length rightTableContent)],
                           let rightRow = rightTableContent !! (rightIndex - 1),
-                          let (newRow,_) = createJoinedRow leftIndex rightIndex,
+                          let newRow = createJoinedRow (leftIndex-1) (rightIndex-1) L,
                           matchRowListToExpression
                             [leftRow, rightRow] [leftIndex,rightIndex] boolExpr [leftTableName, rightTableName] finalTableEnv]
 
                   ++ [newRow |
                           leftIndex <- [1 .. (length leftTableContent)],
                           let leftRow = leftTableContent !! (leftIndex - 1),
-                          let (newRow,_) = createJoinedRow leftIndex 0,
+                          let newRow = createJoinedRow (leftIndex-1) 0 L,
                           not (or [matchRowListToExpression
                                     [leftRow, rightRow] [leftIndex,rightIndex] boolExpr [leftTableName, rightTableName] finalTableEnv |
                                     rightIndex <- [1 .. (length rightTableContent)],
@@ -353,32 +354,32 @@ evalJoin (JoinClause leftTableExpression joinOperator rightTableExpression boolE
                           let leftRow = leftTableContent !! (leftIndex - 1),
                           rightIndex <- [1 .. (length rightTableContent)],
                           let rightRow = rightTableContent !! (rightIndex - 1),
-                          let (newRow,_) = createJoinedRow leftIndex rightIndex,
+                          let newRow = createJoinedRow (leftIndex-1) (rightIndex-1) L,
                           matchRowListToExpression
                             [leftRow, rightRow] [leftIndex,rightIndex] boolExpr [leftTableName, rightTableName] finalTableEnv]
 
                   ++ [newRow |
                           rightIndex <- [1 .. (length rightTableContent)],
                           let rightRow = rightTableContent !! (rightIndex - 1),
-                          let (newRow,_) = createJoinedRow 0 rightIndex,
+                          let newRow = createJoinedRow 0 (rightIndex-1) R,
                           not (or [matchRowListToExpression
                                      [leftRow, rightRow] [leftIndex, rightIndex] boolExpr
                                      [leftTableName, rightTableName] finalTableEnv |
-                                     let leftRow = rightTableContent !! (rightIndex - 1),
-                                     leftIndex <- [1 .. (length rightTableContent)]])]
+                                     leftIndex <- [1 .. (length leftTableContent)],
+                                     let leftRow = leftTableContent !! (leftIndex - 1)])]
           JoinFull -> [newRow |
                           leftIndex <- [1 .. (length leftTableContent)],
                           let leftRow = leftTableContent !! (leftIndex - 1),
                           rightIndex <- [1 .. (length rightTableContent)],
                           let rightRow = rightTableContent !! (rightIndex - 1),
-                          let (newRow,_) = createJoinedRow leftIndex rightIndex,
+                          let newRow = createJoinedRow (leftIndex-1) (rightIndex-1) L,
                           matchRowListToExpression
                             [leftRow, rightRow] [leftIndex,rightIndex] boolExpr [leftTableName, rightTableName] finalTableEnv]
 
                   ++ [newRow |
                           leftIndex <- [1 .. (length leftTableContent)],
                           let leftRow = leftTableContent !! (leftIndex - 1),
-                          let (newRow,_) = createJoinedRow leftIndex 0,
+                          let newRow = createJoinedRow (leftIndex-1) 0 L,
                           not (or [matchRowListToExpression
                                     [leftRow, rightRow] [leftIndex,rightIndex] boolExpr [leftTableName, rightTableName] finalTableEnv |
                                     rightIndex <- [1 .. (length rightTableContent)],
@@ -387,12 +388,12 @@ evalJoin (JoinClause leftTableExpression joinOperator rightTableExpression boolE
                   ++ [newRow |
                           rightIndex <- [1 .. (length rightTableContent)],
                           let rightRow = rightTableContent !! (rightIndex - 1),
-                          let (newRow,_) = createJoinedRow 0 rightIndex,
+                          let newRow = createJoinedRow 0 (rightIndex-1) R,
                           not (or [matchRowListToExpression
                                      [leftRow, rightRow] [leftIndex, rightIndex] boolExpr
                                      [leftTableName, rightTableName] finalTableEnv |
-                                     let leftRow = rightTableContent !! (rightIndex - 1),
-                                     leftIndex <- [1 .. (length rightTableContent)]])]
+                                     leftIndex <- [1 .. (length leftTableContent)],
+                                     let leftRow = leftTableContent !! (leftIndex - 1)])]
 
 
   where
@@ -400,21 +401,23 @@ evalJoin (JoinClause leftTableExpression joinOperator rightTableExpression boolE
     (rightTableName, finalTableEnv) = evalTableExpression rightTableExpression leftTableEnv
     T leftTableContent _ = lookupTable leftTableName finalTableEnv
     T rightTableContent _ = lookupTable rightTableName finalTableEnv
+    leftArity = length (head leftTableContent)
     rightArity = length (head rightTableContent)
 
     --Given two rows, it creates a joined row based on the boolean expression given
     --It also returns whether or not the rows match the boolean expression given
-    createJoinedRow :: Int -> Int -> (RowData,Bool)
-    createJoinedRow leftIndex rightIndex = (joinedRow, match)
+    createJoinedRow :: Int -> Int -> JoinDir -> RowData
+    createJoinedRow leftIndex rightIndex joinDir = joinedRow
       where
         leftRow = leftTableContent!!leftIndex
         rightRow = rightTableContent!!rightIndex
 
         joinColumns = getJoinColumns boolExpr
-        (joinedRow, match) = case joinColumns of
-                                Just (leftCol, rightCol) | leftRow!!leftCol == rightRow!!rightCol -> (leftRow ++ removeAt rightCol rightRow, True)
-                                                         | otherwise -> (leftRow ++ replicate (rightArity-1) "",False)
-                                Nothing -> (leftRow ++ rightRow, True)
+        joinedRow = case joinColumns of
+                      Just (leftCol, rightCol) | leftRow!!leftCol == rightRow!!rightCol -> leftRow ++ removeAt rightCol rightRow
+                                                | joinDir == L -> leftRow ++ replicate (rightArity-1) ""
+                                                | joinDir == R -> replicate (leftCol) "" ++ [rightRow!!rightCol] ++ replicate (leftArity-leftCol-1) "" ++ removeAt rightCol rightRow
+                      Nothing -> (leftRow ++ rightRow)
 
 
     --Finds the indexes of the columns in both the left and right table to join on
