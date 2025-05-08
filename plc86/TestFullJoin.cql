@@ -1,0 +1,13 @@
+{INPUT FILE "P.csv" AS p NOLABELS, INPUT FILE "Q.csv" AS q NOLABELS}
+LET join NOLABELS BE
+    SELECT COLUMNS *
+    FROM
+    LET joinedTable NOLABELS BE
+        p FULL JOIN q 
+        WITHCONSTRAINT p.1 = q.1
+    -
+LET sorted NOLABELS BE
+    SORT join ASC
+    -
+QUERIESEND
+OUTPUT sorted TO STANDARD
